@@ -874,6 +874,108 @@ h3 {
 @keyframes typing { from { width:0; } to { width:100%; } }
 @keyframes blink { 50% { border-color: transparent; } }
 
+
+/* ══════════════════════════════════════════
+   MOBILE — aktivizohet vetëm kur JS shton .is-mobile në body
+══════════════════════════════════════════ */
+
+body.is-mobile { overflow-y: auto; overflow-x: hidden; height: auto; }
+body.is-mobile .deck { height: auto; position: relative; }
+
+body.is-mobile .slide {
+  position: relative;
+  opacity: 1 !important;
+  pointer-events: all !important;
+  transform: none !important;
+  padding: 80px 20px 100px;
+  min-height: 100vh;
+  display: none;
+}
+
+body.is-mobile .slide.active { display: flex; }
+
+body.is-mobile .logo-mark { left: 20px; top: 20px; }
+body.is-mobile .logo-text { font-size: 10px; }
+body.is-mobile .counter { right: 20px; top: 24px; font-size: 10px; }
+
+body.is-mobile .nav { bottom: 20px; gap: 6px; }
+body.is-mobile .nav-btn { width: 44px; height: 44px; font-size: 18px; }
+body.is-mobile .dot { width: 5px; height: 5px; }
+body.is-mobile .dot.active { width: 18px; }
+
+/* HERO */
+body.is-mobile h1 { font-size: clamp(36px, 10vw, 52px); letter-spacing: -1px; }
+body.is-mobile h2 { font-size: clamp(22px, 6vw, 32px); }
+body.is-mobile .hero-stats { gap: 20px; flex-wrap: wrap; justify-content: center; }
+body.is-mobile .hstat-num { font-size: 22px; }
+body.is-mobile .orbit-ring { display: none; }
+body.is-mobile .hero-badge { font-size: 9px; letter-spacing: 1px; }
+body.is-mobile .hero-sub { font-size: 13px; }
+
+/* SLIDE 2 */
+body.is-mobile .four-col {
+  grid-template-columns: 1fr;
+  gap: 12px;
+  overflow-y: auto;
+  max-height: calc(100vh - 180px);
+}
+body.is-mobile .arch-card { padding: 20px 16px; }
+
+/* SLIDE 3 */
+body.is-mobile .flow-layout { grid-template-columns: 1fr; gap: 20px; }
+body.is-mobile .flow-diagram { display: none; }
+body.is-mobile .flow-nodes { gap: 0; }
+body.is-mobile .flow-node { padding: 12px 14px; }
+
+/* SLIDE 4 */
+body.is-mobile .infra-layout { grid-template-columns: 1fr; gap: 20px; }
+body.is-mobile .vm-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+body.is-mobile .vm-card { padding: 12px; }
+body.is-mobile .vm-os { font-size: 11px; }
+body.is-mobile .pod-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+body.is-mobile .pod { padding: 10px 8px; gap: 6px; }
+body.is-mobile .pod-name { font-size: 11px; }
+body.is-mobile .pod-ver { font-size: 9px; }
+body.is-mobile .pod-icon { font-size: 14px; width: 26px; height: 26px; }
+
+/* SLIDE 5 */
+body.is-mobile .services-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+body.is-mobile .svc-card { padding: 14px 12px; }
+body.is-mobile .svc-name { font-size: 12px; }
+body.is-mobile .svc-desc { font-size: 10px; }
+body.is-mobile .svc-icon-wrap { width: 32px; height: 32px; font-size: 16px; }
+
+/* SLIDE 6 */
+body.is-mobile .sec-layout { grid-template-columns: 1fr; gap: 16px; }
+body.is-mobile .sec-panel { padding: 20px 16px; }
+body.is-mobile .dns-big { font-size: 32px; }
+body.is-mobile .sec-list li { font-size: 12px; }
+
+/* SLIDE 7 */
+body.is-mobile .conclusion-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+body.is-mobile .con-card { padding: 16px 12px; }
+body.is-mobile .con-title { font-size: 12px; }
+body.is-mobile .con-desc { font-size: 10px; }
+body.is-mobile .conclusion-content p { font-size: 13px; margin-bottom: 28px; }
+
+body.is-mobile .slide-header { margin-bottom: 20px; }
+body.is-mobile .proxmox-box::before,
+body.is-mobile .k8s-box::before { font-size: 8px; }
+
+body.is-mobile #s2,
+body.is-mobile #s4,
+body.is-mobile #s5 {
+  justify-content: flex-start;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Small phones */
+body.is-mobile.small-phone .services-grid { grid-template-columns: 1fr; }
+body.is-mobile.small-phone .conclusion-grid { grid-template-columns: 1fr; }
+body.is-mobile.small-phone .vm-grid { grid-template-columns: 1fr; }
+body.is-mobile.small-phone .pod-grid { grid-template-columns: 1fr; }
+body.is-mobile.small-phone h1 { font-size: 32px; }
 </style>
 </head>
 <body>
@@ -1473,6 +1575,19 @@ h3 {
 </div><!-- end deck -->
 
 <script>
+// ── DEVICE DETECTION ──
+// Detekton iPhone, iPad, Android — jo vetëm screen size
+const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPad me Safari desktop mode
+
+if (isMobile) {
+  document.body.classList.add('is-mobile');
+  if (window.screen.width <= 400) {
+    document.body.classList.add('small-phone');
+  }
+}
+
+// ── SLIDE ENGINE ──
 const slides = document.querySelectorAll('.slide');
 const dots = document.querySelectorAll('.dot');
 const counter = document.getElementById('counter');
@@ -1485,11 +1600,12 @@ function goTo(n) {
   slides[current].classList.add('active');
   dots[current].classList.add('active');
   counter.textContent = String(current + 1).padStart(2,'0') + ' / ' + String(slides.length).padStart(2,'0');
+  // scroll to top on mobile
+  if (isMobile) window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 document.getElementById('next').addEventListener('click', () => goTo(current + 1));
 document.getElementById('prev').addEventListener('click', () => goTo(current - 1));
-
 dots.forEach((d, i) => d.addEventListener('click', () => goTo(i)));
 
 document.addEventListener('keydown', e => {
@@ -1497,9 +1613,9 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(current - 1);
 });
 
-// Touch support
+// Touch swipe
 let tx = 0;
-document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; });
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
 document.addEventListener('touchend', e => {
   const dx = tx - e.changedTouches[0].clientX;
   if (Math.abs(dx) > 50) goTo(current + (dx > 0 ? 1 : -1));
