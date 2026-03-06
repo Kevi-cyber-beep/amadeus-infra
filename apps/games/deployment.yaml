@@ -21,29 +21,31 @@ spec:
             - -c
             - |
               mkdir -p /data/roms/gba /data/roms/nes /data/roms/snes /data/roms/n64 /data/roms/psx
+              wget -q https://github.com/EmulatorJS/EmulatorJS/archive/refs/heads/main.tar.gz -O /tmp/ejs.tar.gz
+              tar -xzf /tmp/ejs.tar.gz -C /tmp/
+              cp -r /tmp/EmulatorJS-main/data /data/emulatorjs
+              echo "EmulatorJS ready"
           volumeMounts:
             - name: roms
               mountPath: /data
       containers:
-        - name: emulatorjs
-          image: lscr.io/linuxserver/emulatorjs:latest
+        - name: nginx
+          image: nginx:alpine
           ports:
             - containerPort: 80
-            - containerPort: 3000
-          env:
-            - name: PUID
-              value: "1000"
-            - name: PGID
-              value: "1000"
-            - name: TZ
-              value: "Europe/Tirane"
           volumeMounts:
             - name: roms
-              mountPath: /data
+              mountPath: /usr/share/nginx/html/data
+            - name: config
+              mountPath: /usr/share/nginx/html/index.html
+              subPath: index.html
       volumes:
         - name: roms
           persistentVolumeClaim:
             claimName: games-roms-pvc
+        - name: config
+          configMap:
+            name: emulatorjs-config
 ---
 apiVersion: v1
 kind: Service
@@ -59,7 +61,41 @@ spec:
       port: 80
       targetPort: 80
       nodePort: 30800
-    - name: mgmt
-      port: 3000
-      targetPort: 3000
-      nodePort: 30801
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: emulatorjs-config
+  namespace: games
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Amadeus Gaming</title>
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; padding: 2rem; }
+        h1 { color: #38bdf8; margin-bottom: 0.5rem; }
+        p.sub { color: #64748b; font-size: 0.85rem; margin-bottom: 2rem; }
+        #game { width: 100%; max-width: 800px; margin: 0 auto; display: block; }
+        #emulator { width: 100%; aspect-ratio: 4/3; background: #000; }
+      </style>
+    </head>
+    <body>
+      <h1>🎮 Amadeus Gaming</h1>
+      <p class="sub">Retro Gaming — Homelab Amadeus</p>
+      <div id="game">
+        <div id="emulator"></div>
+      </div>
+      <script type="text/javascript">
+        EJS_player = '#emulator';
+        EJS_core = 'gba';
+        EJS_gameUrl = '/data/roms/gba/game.gba';
+        EJS_pathtodata = '/data/emulatorjs/';
+      </script>
+      <script src="/data/emulatorjs/loader.js"></script>
+    </body>
+    </html>
