@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: emulatorjs-ingress
+  namespace: games
+  annotations:
+    cert-manager.io/cluster-issuer: "amadeus-ca-issuer"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - games.amadeus.local
+      secretName: games-tls
+  rules:
+    - host: games.amadeus.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: emulatorjs
+                port:
+                  number: 80
