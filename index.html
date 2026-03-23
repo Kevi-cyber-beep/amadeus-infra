@@ -1,1785 +1,1639 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>▲ AMΔDEUS INFRA</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg: #020408;
-  --surface: #080d14;
-  --surface2: #0d1520;
-  --border: rgba(255,255,255,0.06);
-  --cyan: #00d4ff;
-  --cyan2: #00a8cc;
-  --green: #00ff9d;
-  --purple: #7c6aff;
-  --orange: #ff8c42;
-  --red: #ff4d6d;
-  --text: #e8edf5;
-  --muted: #5a6a80;
-}
-
-* { margin:0; padding:0; box-sizing:border-box; }
-
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  overflow: hidden;
-  height: 100vh;
-  width: 100vw;
-}
-
-/* ── SLIDE ENGINE ── */
-.deck { width:100%; height:100%; position:relative; }
-
-.slide {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.6s cubic-bezier(.4,0,.2,1), transform 0.6s cubic-bezier(.4,0,.2,1);
-  transform: translateY(24px);
-  padding: 48px 64px;
-}
-
-.slide.active {
-  opacity: 1;
-  pointer-events: all;
-  transform: translateY(0);
-}
-
-/* ── GRID BG ── */
-.grid-bg {
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
-  background-size: 48px 48px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.noise-overlay {
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.4;
-}
-
-/* ── NAV ── */
-.nav {
-  position: fixed;
-  bottom: 36px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 8px;
-  z-index: 100;
-  align-items: center;
-}
-
-.dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--muted);
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.dot.active { background: var(--cyan); width: 24px; border-radius: 3px; }
-
-.nav-btn {
-  background: rgba(0,212,255,0.08);
-  border: 1px solid rgba(0,212,255,0.2);
-  color: var(--cyan);
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 8px;
-}
-
-.nav-btn:hover { background: rgba(0,212,255,0.2); }
-
-/* slide counter */
-.counter {
-  position: fixed;
-  top: 32px;
-  right: 48px;
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  color: var(--muted);
-  z-index: 100;
-  letter-spacing: 2px;
-}
-
-/* ── TYPOGRAPHY ── */
-.eyebrow {
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 3px;
-  color: var(--cyan);
-  text-transform: uppercase;
-  margin-bottom: 16px;
-}
-
-h1 {
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: clamp(48px, 7vw, 88px);
-  line-height: 0.95;
-  letter-spacing: -2px;
-}
-
-h2 {
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: clamp(28px, 3.5vw, 44px);
-  letter-spacing: -1px;
-  line-height: 1.1;
-}
-
-h3 {
-  font-family: 'Syne', sans-serif;
-  font-weight: 600;
-  font-size: 18px;
-}
-
-/* ── SLIDE 1: HERO ── */
-#s1 {
-  background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,212,255,0.06) 0%, transparent 70%);
-}
-
-.hero-center { text-align: center; position:relative; z-index:1; }
-
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(0,212,255,0.08);
-  border: 1px solid rgba(0,212,255,0.2);
-  padding: 6px 16px;
-  border-radius: 100px;
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 2px;
-  color: var(--cyan);
-  margin-bottom: 32px;
-}
-
-.pulse-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--green);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity:1; box-shadow: 0 0 0 0 rgba(0,255,157,0.4); }
-  50% { box-shadow: 0 0 0 6px rgba(0,255,157,0); }
-}
-
-.hero-title { color: var(--text); }
-.hero-title span { color: var(--cyan); }
-
-.hero-sub {
-  font-size: 16px;
-  color: var(--muted);
-  margin-top: 20px;
-  font-weight: 300;
-  letter-spacing: 0.5px;
-}
-
-.hero-stats {
-  display: flex;
-  gap: 48px;
-  margin-top: 52px;
-  justify-content: center;
-}
-
-.hstat {
-  text-align: center;
-}
-
-.hstat-num {
-  font-family: 'Space Mono', monospace;
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--cyan);
-  display: block;
-}
-
-.hstat-lbl {
-  font-size: 11px;
-  color: var(--muted);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-top: 4px;
-}
-
-.orbit-ring {
-  position: absolute;
-  border-radius: 50%;
-  border: 1px solid rgba(0,212,255,0.08);
-  animation: spin linear infinite;
-  top: 50%; left: 50%;
-  transform-origin: center;
-}
-
-.r1 { width:360px; height:360px; margin:-180px 0 0 -180px; animation-duration: 30s; }
-.r2 { width:520px; height:520px; margin:-260px 0 0 -260px; animation-duration: 50s; animation-direction: reverse; }
-.r3 { width:680px; height:680px; margin:-340px 0 0 -340px; animation-duration: 80s; border-color: rgba(124,106,255,0.05); }
-
-@keyframes spin { from { transform: translate(-50%,-50%) rotate(0deg); } to { transform: translate(-50%,-50%) rotate(360deg); } }
-
-/* ── SLIDE 2: ARCHITECTURE OVERVIEW ── */
-#s2 { align-items: stretch; }
-
-.slide-header { width:100%; margin-bottom: 32px; position: relative; z-index:1; }
-.slide-header .eyebrow { margin-bottom: 8px; }
-
-.four-col {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  width: 100%;
-  position: relative;
-  z-index:1;
-}
-
-.arch-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 28px 24px;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s;
-}
-
-.arch-card:hover {
-  border-color: rgba(255,255,255,0.12);
-  transform: translateY(-4px);
-}
-
-.arch-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  border-radius: 16px 16px 0 0;
-}
-
-.c-cyan::before { background: var(--cyan); }
-.c-green::before { background: var(--green); }
-.c-purple::before { background: var(--purple); }
-.c-orange::before { background: var(--orange); }
-
-.arch-num {
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 2px;
-  margin-bottom: 20px;
-}
-
-.c-cyan .arch-num { color: var(--cyan); }
-.c-green .arch-num { color: var(--green); }
-.c-purple .arch-num { color: var(--purple); }
-.c-orange .arch-num { color: var(--orange); }
-
-.arch-icon {
-  font-size: 32px;
-  margin-bottom: 16px;
-  display: block;
-}
-
-.arch-card h3 { font-size: 15px; margin-bottom: 10px; }
-
-.arch-card p {
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.6;
-}
-
-.arch-tag {
-  display: inline-block;
-  margin-top: 16px;
-  padding: 3px 10px;
-  border-radius: 100px;
-  font-size: 10px;
-  font-family: 'Space Mono', monospace;
-  letter-spacing: 1px;
-}
-
-.c-cyan .arch-tag { background: rgba(0,212,255,0.1); color: var(--cyan); }
-.c-green .arch-tag { background: rgba(0,255,157,0.1); color: var(--green); }
-.c-purple .arch-tag { background: rgba(124,106,255,0.1); color: var(--purple); }
-.c-orange .arch-tag { background: rgba(255,140,66,0.1); color: var(--orange); }
-
-/* ── SLIDE 3: NETWORK FLOW ── */
-#s3 {
-  background: radial-gradient(ellipse 60% 50% at 30% 50%, rgba(0,255,157,0.04) 0%, transparent 60%);
-}
-
-.flow-layout {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 48px;
-  width: 100%;
-  align-items: center;
-  position: relative; z-index:1;
-}
-
-.flow-nodes {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.flow-node {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  position: relative;
-  transition: all 0.3s;
-}
-
-.flow-node:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  bottom: -17px; left: 28px;
-  width: 1px; height: 16px;
-  background: linear-gradient(to bottom, var(--cyan), rgba(0,212,255,0.3));
-}
-
-.flow-node:hover { border-color: rgba(0,212,255,0.3); }
-
-.fn-icon {
-  width: 36px; height: 36px;
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
-  flex-shrink: 0;
-}
-
-.fn-body { flex: 1; }
-.fn-label { font-size: 13px; font-weight: 500; }
-.fn-sub { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: 'Space Mono', monospace; }
-
-.fn-status {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--green);
-  animation: pulse 2s infinite;
-}
-
-.flow-diagram {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 32px;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Big flow diagram SVG */
-.flow-svg { width: 100%; height: 320px; }
-
-/* ── SLIDE 4: PROXMOX INFRA ── */
-#s4 {
-  background: radial-gradient(ellipse 50% 60% at 70% 50%, rgba(124,106,255,0.05) 0%, transparent 60%);
-}
-
-.infra-layout {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 40px;
-  width: 100%;
-  position: relative; z-index:1;
-}
-
-.proxmox-box {
-  background: var(--surface);
-  border: 1px solid rgba(124,106,255,0.3);
-  border-radius: 20px;
-  padding: 24px;
-  position: relative;
-}
-
-.proxmox-box::before {
-  content: 'PROXMOX HOST';
-  position: absolute;
-  top: -1px; left: 20px;
-  background: var(--purple);
-  color: #000;
-  font-family: 'Space Mono', monospace;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  padding: 3px 10px;
-  border-radius: 0 0 6px 6px;
-}
-
-.vm-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 24px;
-}
-
-.vm-card {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
-  transition: all 0.3s;
-}
-
-.vm-card:hover { border-color: rgba(124,106,255,0.4); transform: scale(1.02); }
-
-.vm-title {
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  color: var(--purple);
-  margin-bottom: 6px;
-}
-
-.vm-os { font-size: 12px; font-weight: 500; margin-bottom: 8px; }
-
-.vm-res {
-  font-size: 10px;
-  color: var(--muted);
-  font-family: 'Space Mono', monospace;
-}
-
-.res-bar {
-  height: 3px;
-  border-radius: 2px;
-  margin-top: 8px;
-  background: var(--border);
-  overflow: hidden;
-}
-
-.res-fill {
-  height: 100%;
-  border-radius: 2px;
-  background: linear-gradient(90deg, var(--purple), var(--cyan));
-}
-
-/* k8s diagram */
-.k8s-box {
-  background: var(--surface);
-  border: 1px solid rgba(0,212,255,0.2);
-  border-radius: 20px;
-  padding: 24px;
-  position: relative;
-}
-
-.k8s-box::before {
-  content: 'K3s KUBERNETES';
-  position: absolute;
-  top: -1px; left: 20px;
-  background: var(--cyan);
-  color: #000;
-  font-family: 'Space Mono', monospace;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  padding: 3px 10px;
-  border-radius: 0 0 6px 6px;
-}
-
-.pod-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-top: 24px;
-}
-
-.pod {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: all 0.3s;
-}
-
-.pod:hover { border-color: rgba(0,212,255,0.3); }
-
-.pod-icon {
-  font-size: 18px;
-  width: 32px; height: 32px;
-  border-radius: 8px;
-  background: var(--surface);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-
-.pod-name { font-size: 12px; font-weight: 600; }
-.pod-ver { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; }
-
-.pod-status {
-  margin-left: auto;
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--green);
-}
-
-/* ── SLIDE 5: SERVICES MESH ── */
-#s5 {}
-
-.mesh-container {
-  width: 100%;
-  position: relative;
-  z-index: 1;
-}
-
-.services-title { margin-bottom: 28px; }
-
-.services-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-}
-
-.svc-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 22px 18px;
-  transition: all 0.35s;
-  position: relative;
-  overflow: hidden;
-  cursor: default;
-}
-
-.svc-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 0.3s;
-  border-radius: 16px;
-}
-
-.svc-card:hover { transform: translateY(-6px); border-color: rgba(255,255,255,0.15); }
-.svc-card:hover::after { opacity: 1; }
-
-.svc-s1::after { background: radial-gradient(circle at 50% 0%, rgba(0,212,255,0.18) 0%, transparent 70%); }
-.svc-s2::after { background: radial-gradient(circle at 50% 0%, rgba(0,255,157,0.18) 0%, transparent 70%); }
-.svc-s3::after { background: radial-gradient(circle at 50% 0%, rgba(124,106,255,0.18) 0%, transparent 70%); }
-.svc-s4::after { background: radial-gradient(circle at 50% 0%, rgba(255,140,66,0.18) 0%, transparent 70%); }
-.svc-s5::after { background: radial-gradient(circle at 50% 0%, rgba(255,77,109,0.18) 0%, transparent 70%); }
-.svc-s6::after { background: radial-gradient(circle at 50% 0%, rgba(0,212,255,0.18) 0%, transparent 70%); }
-.svc-s7::after { background: radial-gradient(circle at 50% 0%, rgba(0,255,157,0.18) 0%, transparent 70%); }
-.svc-s8::after { background: radial-gradient(circle at 50% 0%, rgba(124,106,255,0.18) 0%, transparent 70%); }
-
-.svc-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-  position: relative; z-index:1;
-}
-
-.svc-icon-wrap {
-  width: 40px; height: 40px;
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
-}
-
-.svc-live {
-  font-family: 'Space Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 1px;
-  color: var(--green);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.svc-name {
-  font-family: 'Syne', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 4px;
-  position: relative; z-index:1;
-}
-
-.svc-desc {
-  font-size: 11px;
-  color: var(--muted);
-  line-height: 1.5;
-  position: relative; z-index:1;
-}
-
-.svc-port {
-  margin-top: 12px;
-  font-family: 'Space Mono', monospace;
-  font-size: 10px;
-  color: var(--muted);
-  background: var(--surface2);
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 4px;
-  position: relative; z-index:1;
-}
-
-/* ── SLIDE 6: SECURITY DEEP DIVE ── */
-#s6 {
-  background: radial-gradient(ellipse 50% 50% at 30% 60%, rgba(255,77,109,0.04) 0%, transparent 60%);
-}
-
-.sec-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
-  width: 100%;
-  position: relative; z-index:1;
-}
-
-.sec-panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 28px;
-}
-
-.sec-panel h3 {
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.sec-list { list-style: none; }
-
-.sec-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 13px;
-}
-
-.sec-list li:last-child { border-bottom: none; }
-
-.sec-check {
-  width: 18px; height: 18px;
-  border-radius: 50%;
-  background: rgba(0,255,157,0.12);
-  color: var(--green);
-  font-size: 10px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-.dns-stat {
-  text-align: center;
-  padding: 20px 0;
-}
-
-.dns-big {
-  font-family: 'Space Mono', monospace;
-  font-size: 42px;
-  font-weight: 700;
-  color: var(--green);
-  display: block;
-  line-height: 1;
-}
-
-.dns-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
-
-.blocklist-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 12px;
-}
-
-.bl-num {
-  font-family: 'Space Mono', monospace;
-  color: var(--cyan);
-  font-size: 11px;
-}
-
-/* ── SLIDE 7: CONCLUSION ── */
-#s7 {
-  background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0,212,255,0.05) 0%, transparent 70%);
-  text-align: center;
-}
-
-.conclusion-content { position: relative; z-index:1; max-width: 900px; width:100%; }
-
-.conclusion-content h2 {
-  font-size: clamp(32px, 4vw, 52px);
-  margin-bottom: 16px;
-}
-
-.conclusion-content p {
-  font-size: 15px;
-  color: var(--muted);
-  margin-bottom: 48px;
-  font-weight: 300;
-  max-width: 600px;
-  margin-inline: auto;
-  line-height: 1.7;
-}
-
-.conclusion-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-
-.con-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 24px 16px;
-  transition: all 0.3s;
-}
-
-.con-card:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-4px); }
-
-.con-icon { font-size: 28px; margin-bottom: 12px; }
-.con-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 6px; }
-.con-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
-
-/* ── FLOW SVG ELEMENTS ── */
-.flow-box {
-  fill: #0d1520;
-  stroke: rgba(0,212,255,0.25);
-  stroke-width: 1;
-  rx: 10;
-}
-
-.flow-line {
-  stroke: rgba(0,212,255,0.4);
-  stroke-width: 1.5;
-  fill: none;
-  stroke-dasharray: 6 4;
-  animation: dash 2s linear infinite;
-}
-
-@keyframes dash { to { stroke-dashoffset: -20; } }
-
-.flow-text { fill: #e8edf5; font-family: 'DM Sans', sans-serif; font-size: 12px; }
-.flow-sub { fill: #5a6a80; font-family: 'Space Mono', monospace; font-size: 9px; }
-.flow-label { fill: #00d4ff; font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 1px; }
-
-/* ── PAGE LOADER ── */
-#loader {
-  position: fixed;
-  inset: 0;
-  background: var(--bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  transition: opacity 0.5s ease, visibility 0.5s ease;
-}
-
-#loader.hidden {
-  opacity: 0;
-  visibility: hidden;
-}
-
-.loader-inner {
-  text-align: center;
-}
-
-.loader-logo {
-  font-family: 'Space Mono', monospace;
-  font-size: 13px;
-  letter-spacing: 4px;
-  color: var(--cyan);
-  margin-bottom: 20px;
-  opacity: 0;
-  animation: loaderFadeIn 0.4s ease 0.1s forwards;
-}
-
-.loader-bar-wrap {
-  width: 160px;
-  height: 2px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 2px;
-  overflow: hidden;
-  margin: 0 auto;
-}
-
-.loader-bar {
-  height: 100%;
-  background: linear-gradient(90deg, var(--cyan), var(--purple));
-  border-radius: 2px;
-  animation: loaderBar 0.7s cubic-bezier(.4,0,.2,1) 0.2s both;
-}
-
-@keyframes loaderFadeIn { to { opacity: 1; } }
-@keyframes loaderBar { from { width: 0; } to { width: 100%; } }
-
-/* ── SCAN LINE ── */
-.scan-line {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0,212,255,0.3), transparent);
-  animation: scan 8s linear infinite;
-  pointer-events: none;
-  z-index: 200;
-}
-
-@keyframes scan { from { top: 0; } to { top: 100vh; } }
-
-/* ── LOGO ── */
-.logo-mark {
-  position: fixed;
-  top: 24px; left: 48px;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-}
-
-.logo-triangle {
-  font-size: 22px; line-height: 1;
-  background: linear-gradient(135deg, var(--cyan), var(--purple));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight: 700;
-  transition: transform 0.3s;
-}
-
-.logo-mark:hover .logo-triangle { transform: translateY(-2px); }
-
-.logo-text-wrap { display: flex; flex-direction: column; gap: 1px; }
-
-.logo-text {
-  font-family: 'Space Mono', monospace;
-  font-size: 12px; letter-spacing: 3px;
-  color: var(--text); line-height: 1;
-}
-
-.logo-sub {
-  font-family: 'Space Mono', monospace;
-  font-size: 8px; letter-spacing: 2px;
-  color: var(--muted); line-height: 1;
-}
-
-/* Stagger animations */
-.slide.active .arch-card { animation: fadeUp 0.5s both; }
-.slide.active .arch-card:nth-child(1) { animation-delay: 0.1s; }
-.slide.active .arch-card:nth-child(2) { animation-delay: 0.2s; }
-.slide.active .arch-card:nth-child(3) { animation-delay: 0.3s; }
-.slide.active .arch-card:nth-child(4) { animation-delay: 0.4s; }
-
-.slide.active .svc-card { animation: fadeUp 0.5s both; }
-.slide.active .svc-card:nth-child(1) { animation-delay: 0.05s; }
-.slide.active .svc-card:nth-child(2) { animation-delay: 0.1s; }
-.slide.active .svc-card:nth-child(3) { animation-delay: 0.15s; }
-.slide.active .svc-card:nth-child(4) { animation-delay: 0.2s; }
-.slide.active .svc-card:nth-child(5) { animation-delay: 0.25s; }
-.slide.active .svc-card:nth-child(6) { animation-delay: 0.3s; }
-.slide.active .svc-card:nth-child(7) { animation-delay: 0.35s; }
-.slide.active .svc-card:nth-child(8) { animation-delay: 0.4s; }
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.slide-full { width:100%; }
-
-.vm-card-wide {
-  grid-column: span 2;
-}
-
-/* typewriter */
-.typewriter {
-  overflow: hidden;
-  white-space: nowrap;
-  border-right: 2px solid var(--cyan);
-  animation: typing 2s steps(20) 0.5s both, blink 0.7s step-end infinite;
-  display: inline-block;
-}
-
-@keyframes typing { from { width:0; } to { width:100%; } }
-@keyframes blink { 50% { border-color: transparent; } }
-
-
-/* ══════════════════════════════════════════
-   MOBILE — aktivizohet vetëm kur JS shton .is-mobile në body
-══════════════════════════════════════════ */
-
-body.is-mobile { overflow-y: auto; overflow-x: hidden; height: auto; }
-body.is-mobile .deck { height: auto; position: relative; }
-
-body.is-mobile .slide {
-  position: relative;
-  opacity: 1 !important;
-  pointer-events: all !important;
-  transform: none !important;
-  padding: 80px 20px 100px;
-  min-height: 100vh;
-  display: none;
-}
-
-body.is-mobile .slide.active { display: flex; }
-
-body.is-mobile .logo-mark { left: 20px; top: 20px; }
-body.is-mobile .logo-text { font-size: 10px; letter-spacing: 2px; }
-body.is-mobile .logo-sub { font-size: 7px; }
-body.is-mobile .logo-triangle { font-size: 18px; }
-body.is-mobile .counter { right: 20px; top: 24px; font-size: 10px; }
-
-body.is-mobile .nav { bottom: 20px; gap: 6px; }
-body.is-mobile .nav-btn { width: 44px; height: 44px; font-size: 18px; }
-body.is-mobile .dot { width: 5px; height: 5px; }
-body.is-mobile .dot.active { width: 18px; }
-
-/* HERO */
-body.is-mobile h1 { font-size: clamp(36px, 10vw, 52px); letter-spacing: -1px; }
-body.is-mobile h2 { font-size: clamp(22px, 6vw, 32px); }
-body.is-mobile .hero-stats { gap: 20px; flex-wrap: wrap; justify-content: center; }
-body.is-mobile .hstat-num { font-size: 22px; }
-body.is-mobile .orbit-ring { display: none; }
-body.is-mobile .hero-badge { font-size: 9px; letter-spacing: 1px; }
-body.is-mobile .hero-sub { font-size: 13px; }
-
-/* SLIDE 2 */
-body.is-mobile .four-col {
-  grid-template-columns: 1fr;
-  gap: 12px;
-  overflow-y: auto;
-  max-height: calc(100vh - 180px);
-}
-body.is-mobile .arch-card { padding: 20px 16px; }
-
-/* SLIDE 3 */
-body.is-mobile .flow-layout { grid-template-columns: 1fr; gap: 20px; }
-body.is-mobile .flow-diagram { display: none; }
-body.is-mobile .flow-nodes { gap: 0; }
-body.is-mobile .flow-node { padding: 12px 14px; }
-
-/* SLIDE 4 */
-body.is-mobile .infra-layout { grid-template-columns: 1fr; gap: 20px; }
-body.is-mobile .vm-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-body.is-mobile .vm-card { padding: 12px; }
-body.is-mobile .vm-os { font-size: 11px; }
-body.is-mobile .pod-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-body.is-mobile .pod { padding: 10px 8px; gap: 6px; }
-body.is-mobile .pod-name { font-size: 11px; }
-body.is-mobile .pod-ver { font-size: 9px; }
-body.is-mobile .pod-icon { font-size: 14px; width: 26px; height: 26px; }
-
-/* SLIDE 5 */
-body.is-mobile .services-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-body.is-mobile .svc-card { padding: 14px 12px; }
-body.is-mobile .svc-name { font-size: 12px; }
-body.is-mobile .svc-desc { font-size: 10px; }
-body.is-mobile .svc-icon-wrap { width: 32px; height: 32px; font-size: 16px; }
-
-/* SLIDE 6 */
-body.is-mobile .sec-layout { grid-template-columns: 1fr; gap: 16px; }
-body.is-mobile .sec-panel { padding: 20px 16px; }
-body.is-mobile .dns-big { font-size: 32px; }
-body.is-mobile .sec-list li { font-size: 12px; }
-
-/* SLIDE 7 */
-body.is-mobile .conclusion-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-body.is-mobile .con-card { padding: 16px 12px; }
-body.is-mobile .con-title { font-size: 12px; }
-body.is-mobile .con-desc { font-size: 10px; }
-body.is-mobile .conclusion-content p { font-size: 13px; margin-bottom: 28px; }
-
-body.is-mobile .slide-header { margin-bottom: 20px; }
-body.is-mobile .proxmox-box::before,
-body.is-mobile .k8s-box::before { font-size: 8px; }
-
-body.is-mobile #s2,
-body.is-mobile #s4,
-body.is-mobile #s5 {
-  justify-content: flex-start;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* ── SWIPE HINT ── */
-.swipe-hint {
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: 'Space Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 2px;
-  color: var(--muted);
-  z-index: 100;
-  animation: hintFade 4s ease 2s forwards;
-  opacity: 0;
-  white-space: nowrap;
-}
-
-.swipe-arrow {
-  display: inline-block;
-  animation: hintBounce 1s ease-in-out infinite;
-}
-
-@keyframes hintFade {
-  0% { opacity: 0; }
-  15% { opacity: 1; }
-  75% { opacity: 1; }
-  100% { opacity: 0; visibility: hidden; }
-}
-
-@keyframes hintBounce {
-  0%, 100% { transform: translateX(0); }
-  50% { transform: translateX(6px); }
-}
-
-/* Small phones */
-body.is-mobile.small-phone .services-grid { grid-template-columns: 1fr; }
-body.is-mobile.small-phone .conclusion-grid { grid-template-columns: 1fr; }
-body.is-mobile.small-phone .vm-grid { grid-template-columns: 1fr; }
-body.is-mobile.small-phone .pod-grid { grid-template-columns: 1fr; }
-body.is-mobile.small-phone h1 { font-size: 32px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AMΔDEUS — Homelab Infrastructure</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #020408;
+      --surface: #080d14;
+      --surface2: #0d1520;
+      --border: rgba(255,255,255,0.06);
+      --cyan: #00d4ff;
+      --cyan2: #00a8cc;
+      --green: #00ff9d;
+      --purple: #7c6aff;
+      --orange: #ff8c42;
+      --red: #ff4d6d;
+      --text: #e8edf5;
+      --muted: #5a6a80;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    /* ── Boot Screen ── */
+    #boot {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s ease;
+    }
+    #boot.fade-out { opacity: 0; pointer-events: none; }
+    #boot-terminal {
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
+      color: var(--green);
+      line-height: 2;
+      max-width: 600px;
+      width: 90%;
+    }
+    #boot-terminal .boot-line { display: block; white-space: pre; }
+    #boot-cursor {
+      display: inline-block;
+      width: 9px;
+      height: 16px;
+      background: var(--green);
+      vertical-align: middle;
+      animation: blink 0.7s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── Matrix Canvas ── */
+    #matrix-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      opacity: 0.07;
+      pointer-events: none;
+    }
+
+    /* ── Fixed BG Elements ── */
+    #grid-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    #noise-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+    #scan-line {
+      position: fixed;
+      left: 0; right: 0;
+      height: 2px;
+      background: rgba(0,212,255,0.3);
+      z-index: 3;
+      pointer-events: none;
+      animation: scanMove 8s linear infinite;
+    }
+    @keyframes scanMove {
+      0% { top: -2px; }
+      100% { top: 100vh; }
+    }
+    #logo-mark {
+      position: fixed;
+      top: 20px; left: 24px;
+      z-index: 201;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--cyan);
+      letter-spacing: 2px;
+      opacity: 0.7;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    #logo-mark.in-nav { opacity: 0; }
+
+    /* ── Tab Navigation ── */
+    #tab-nav {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(2,4,8,0.9);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      height: 52px;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    #tab-nav::-webkit-scrollbar { display: none; }
+    .nav-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--cyan);
+      letter-spacing: 2px;
+      white-space: nowrap;
+      margin-right: 20px;
+      opacity: 0.8;
+      flex-shrink: 0;
+    }
+    .tab-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 6px 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.2s, border-color 0.2s, text-shadow 0.2s;
+      flex-shrink: 0;
+      height: 52px;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active {
+      color: var(--cyan);
+      border-bottom-color: var(--cyan);
+      text-shadow: 0 0 8px rgba(0,212,255,0.5);
+    }
+
+    /* ── Sections ── */
+    section {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      padding: 120px 64px 80px;
+    }
+    .section-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: var(--cyan);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      opacity: 0.8;
+    }
+    section h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 800;
+      margin-bottom: 56px;
+      line-height: 1.1;
+    }
+
+    /* ── Glitch Decode ── */
+    .glitch-decode { display: inline-block; }
+
+    /* ── Card Scan-In ── */
+    @keyframes scanIn {
+      0% {
+        opacity: 0;
+        transform: translateY(30px);
+        border-top-color: var(--cyan);
+        box-shadow: 0 -2px 0 var(--cyan);
+      }
+      30% {
+        border-top-color: var(--cyan);
+        box-shadow: 0 -2px 0 rgba(0,212,255,0.5);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+        border-top-color: var(--border);
+        box-shadow: none;
+      }
+    }
+
+    /* ── HERO ── */
+    #hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-badge {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: var(--cyan);
+      border: 1px solid rgba(0,212,255,0.3);
+      padding: 6px 18px;
+      border-radius: 2px;
+      margin-bottom: 32px;
+      background: rgba(0,212,255,0.05);
+    }
+    .hero-badge::before { content: '● '; color: var(--green); }
+    #hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(3rem, 8vw, 7rem);
+      font-weight: 800;
+      line-height: 1.0;
+      margin-bottom: 24px;
+    }
+    .hero-sub {
+      font-size: 16px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-family: 'Space Mono', monospace;
+      margin-bottom: 64px;
+    }
+    .hero-stats {
+      display: flex;
+      gap: 48px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .stat-item { text-align: center; }
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: var(--cyan);
+      display: block;
+      line-height: 1;
+    }
+    .stat-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    /* Orbit rings */
+    .orbit-container {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 700px; height: 700px;
+      pointer-events: none;
+      z-index: -1;
+    }
+    .orbit-ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      border: 1px solid rgba(0,212,255,0.06);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .orbit-ring:nth-child(1) { width: 400px; height: 400px; animation: spin 20s linear infinite; }
+    .orbit-ring:nth-child(2) { width: 560px; height: 560px; animation: spin 35s linear infinite reverse; border-style: dashed; }
+    .orbit-ring:nth-child(3) { width: 700px; height: 700px; animation: spin 50s linear infinite; }
+    @keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--cyan);
+      animation: hintPulse 2s ease-in-out infinite;
+    }
+    @keyframes hintPulse {
+      0%, 100% { opacity: 0.4; transform: translateX(-50%) translateY(0); }
+      50% { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+    }
+
+    /* ── ARCHITECTURE ── */
+    .arch-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    .arch-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 28px 24px;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .arch-card:hover {
+      border-color: rgba(0,212,255,0.2);
+      box-shadow: 0 0 20px rgba(0,212,255,0.05);
+    }
+    .arch-card .card-icon {
+      font-size: 28px;
+      margin-bottom: 16px;
+    }
+    .arch-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .arch-card p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 1px;
+      color: var(--cyan);
+      border: 1px solid rgba(0,212,255,0.2);
+      padding: 3px 8px;
+      border-radius: 2px;
+      background: rgba(0,212,255,0.05);
+    }
+
+    /* ── NETWORK ── */
+    .network-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+    .flow-nodes { display: flex; flex-direction: column; gap: 16px; }
+    .flow-node {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: border-color 0.3s;
+    }
+    .flow-node:hover { border-color: rgba(0,212,255,0.2); }
+    .flow-icon { font-size: 20px; flex-shrink: 0; }
+    .flow-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .flow-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .network-svg-wrap { position: relative; }
+    .network-svg-wrap svg { width: 100%; height: auto; }
+
+    /* ── INFRASTRUCTURE ── */
+    .infra-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+    .infra-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 28px;
+    }
+    .infra-box-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--cyan);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .vm-grid { display: flex; flex-direction: column; gap: 12px; }
+    .vm-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-top: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 14px 16px;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    .vm-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .vm-name {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cyan);
+    }
+    .vm-role { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+    .vm-specs { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); margin-bottom: 10px; }
+    .vm-bar-wrap { background: rgba(255,255,255,0.04); border-radius: 2px; height: 3px; overflow: hidden; }
+    .vm-bar { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--green)); border-radius: 2px; }
+    .badge {
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 1px;
+      padding: 2px 7px;
+      border-radius: 2px;
+    }
+    .badge-running { background: rgba(0,255,157,0.1); color: var(--green); border: 1px solid rgba(0,255,157,0.2); }
+    .badge-stopped { background: rgba(255,77,109,0.1); color: var(--red); border: 1px solid rgba(255,77,109,0.2); }
+
+    .pod-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .pod {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-top: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 12px 14px;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    .pod-name {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--green);
+      font-weight: 700;
+    }
+    .pod-ns { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .pod-status {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      margin-right: 4px;
+      box-shadow: 0 0 4px var(--green);
+      animation: pulseDot 2s ease-in-out infinite;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ── SERVICES ── */
+    .svc-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    .svc-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 24px 20px;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: border-color 0.3s, box-shadow 0.3s;
+      position: relative;
+    }
+    .svc-card:hover {
+      border-color: rgba(0,212,255,0.2);
+      box-shadow: 0 0 20px rgba(0,212,255,0.05);
+    }
+    .svc-icon { font-size: 24px; margin-bottom: 12px; }
+    .svc-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .svc-desc { font-size: 12px; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+    .svc-meta { display: flex; align-items: center; justify-content: space-between; }
+    .svc-port {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--cyan);
+      background: rgba(0,212,255,0.05);
+      border: 1px solid rgba(0,212,255,0.15);
+      padding: 3px 8px;
+      border-radius: 2px;
+    }
+    .live-dot {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: var(--green);
+      letter-spacing: 1px;
+    }
+    .live-dot::before {
+      content: '';
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+      animation: pulseDot 2s ease-in-out infinite;
+    }
+
+    /* ── SECURITY ── */
+    .security-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+    .sec-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 32px;
+    }
+    .sec-panel-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--cyan);
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .tls-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .tls-item:last-child { border-bottom: none; }
+    .tls-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+    .tls-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .tls-val { font-size: 12px; color: var(--muted); }
+
+    .dns-big-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 3.5rem;
+      font-weight: 800;
+      color: var(--cyan);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .dns-label { font-size: 12px; color: var(--muted); margin-bottom: 28px; }
+    .blocklist-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .bl-name {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--text);
+      width: 80px;
+      flex-shrink: 0;
+    }
+    .bl-bar-wrap { flex: 1; background: rgba(255,255,255,0.04); border-radius: 2px; height: 4px; overflow: hidden; }
+    .bl-bar { height: 100%; border-radius: 2px; }
+    .bl-count {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      width: 50px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .upstream-badge {
+      margin-top: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,212,255,0.05);
+      border: 1px solid rgba(0,212,255,0.15);
+      padding: 8px 14px;
+      border-radius: 3px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--cyan);
+    }
+
+    /* ── SYSTEM ── */
+    .terminal-card {
+      background: #000;
+      border: 1px solid rgba(0,255,157,0.2);
+      border-radius: 4px;
+      padding: 0;
+      margin-bottom: 48px;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(0,255,157,0.05);
+    }
+    .terminal-titlebar {
+      background: #0a0f0a;
+      border-bottom: 1px solid rgba(0,255,157,0.1);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .term-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .term-dot.red { background: #ff5f57; }
+    .term-dot.yellow { background: #ffbd2e; }
+    .term-dot.green { background: #28c840; }
+    .term-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      margin-left: 8px;
+    }
+    .terminal-body {
+      padding: 24px;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      color: var(--green);
+      line-height: 1.9;
+      min-height: 220px;
+    }
+    .term-prompt { color: var(--cyan); }
+    .term-cmd { color: var(--green); }
+    .term-output { color: rgba(0,255,157,0.6); }
+    .term-cursor {
+      display: inline-block;
+      width: 8px; height: 14px;
+      background: var(--green);
+      vertical-align: middle;
+      animation: blink 0.7s step-end infinite;
+    }
+
+    .conclusion-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    .concl-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 28px 22px;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: border-color 0.3s;
+    }
+    .concl-card:hover { border-color: rgba(0,212,255,0.2); }
+    .concl-icon { font-size: 28px; margin-bottom: 14px; }
+    .concl-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .concl-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    /* ── Footer ── */
+    footer {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 32px;
+      border-top: 1px solid var(--border);
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: var(--muted);
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 768px) {
+      section { padding: 100px 20px 60px; }
+      .arch-grid { grid-template-columns: 1fr; }
+      .network-layout { grid-template-columns: 1fr; }
+      .network-svg-wrap { display: none; }
+      .infra-layout { grid-template-columns: 1fr; }
+      .svc-grid { grid-template-columns: 1fr 1fr; }
+      .security-layout { grid-template-columns: 1fr; }
+      .conclusion-grid { grid-template-columns: 1fr 1fr; }
+      .hero-stats { gap: 24px; }
+      .pod-grid { grid-template-columns: 1fr; }
+      #tab-nav { padding: 0 12px; }
+    }
+    @media (max-width: 480px) {
+      .svc-grid { grid-template-columns: 1fr; }
+      .conclusion-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
 
-<div id="loader">
-  <div class="loader-inner">
-    <div class="loader-logo">▲ AMΔDEUS INFRA</div>
-    <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+<!-- Boot Screen -->
+<div id="boot">
+  <div id="boot-terminal">
+    <span id="boot-cursor"></span>
   </div>
 </div>
 
-<div class="grid-bg"></div>
-<div class="noise-overlay"></div>
-<div class="scan-line"></div>
+<!-- Matrix Canvas -->
+<canvas id="matrix-canvas"></canvas>
 
-<div class="logo-mark">
-  <span class="logo-triangle">▲</span>
-  <div class="logo-text-wrap">
-    <span class="logo-text">AMΔDEUS</span>
-    <span class="logo-sub">INFRA</span>
+<!-- Fixed BG -->
+<div id="grid-overlay"></div>
+<div id="noise-overlay"></div>
+<div id="scan-line"></div>
+<div id="logo-mark">▲ AMΔDEUS / INFRA</div>
+
+<!-- Tab Navigation -->
+<nav id="tab-nav">
+  <div class="nav-logo">▲ AMΔDEUS</div>
+  <button class="tab-btn active" data-target="hero">HERO</button>
+  <button class="tab-btn" data-target="architecture">ARCHITECTURE</button>
+  <button class="tab-btn" data-target="network">NETWORK</button>
+  <button class="tab-btn" data-target="infrastructure">INFRASTRUCTURE</button>
+  <button class="tab-btn" data-target="services">SERVICES</button>
+  <button class="tab-btn" data-target="security">SECURITY</button>
+  <button class="tab-btn" data-target="system">SYSTEM</button>
+</nav>
+
+<!-- ══════════════════════════════════════ HERO ══════════════════════════════════════ -->
+<section id="hero">
+  <div class="orbit-container">
+    <div class="orbit-ring"></div>
+    <div class="orbit-ring"></div>
+    <div class="orbit-ring"></div>
   </div>
-</div>
-
-<div class="counter" id="counter">01 / 07</div>
-
-<div class="swipe-hint" id="swipeHint">
-  <span>NAVIGATE</span>
-  <span class="swipe-arrow">→</span>
-  <span>ARROW KEYS / SWIPE</span>
-</div>
-
-<!-- NAVIGATION -->
-<div class="nav">
-  <button class="nav-btn" id="prev">←</button>
-  <div class="dot active" data-slide="0"></div>
-  <div class="dot" data-slide="1"></div>
-  <div class="dot" data-slide="2"></div>
-  <div class="dot" data-slide="3"></div>
-  <div class="dot" data-slide="4"></div>
-  <div class="dot" data-slide="5"></div>
-  <div class="dot" data-slide="6"></div>
-  <button class="nav-btn" id="next">→</button>
-</div>
-
-<div class="deck">
-
-<!-- ══════════════════════════════════════════
-     SLIDE 1 — HERO
-══════════════════════════════════════════ -->
-<div class="slide active" id="s1">
-  <div class="orbit-ring r1"></div>
-  <div class="orbit-ring r2"></div>
-  <div class="orbit-ring r3"></div>
-
-  <div class="hero-center">
-    <div class="hero-badge">
-      <span class="pulse-dot"></span>
-      KEVIANO GJONAJ · MARCH 2026
+  <div class="hero-badge">KEVIANO GJONAJ · MARCH 2026</div>
+  <h1>Homelab<br><span style="color:var(--cyan)">AMΔDEUS</span></h1>
+  <p class="hero-sub">Private Infrastructure · Self-Hosted · Zero Cloud Dependency</p>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <span class="stat-num">6</span>
+      <div class="stat-label">Virtual Servers</div>
     </div>
-
-    <h1 class="hero-title">
-      Homelab<br><span>AMΔDEUS</span>
-    </h1>
-
-    <p class="hero-sub">Private Infrastructure · Self-Hosted · Zero Cloud Dependency</p>
-
-    <div class="hero-stats">
-      <div class="hstat">
-        <span class="hstat-num">6</span>
-        <span class="hstat-lbl">Virtual Servers</span>
-      </div>
-      <div class="hstat">
-        <span class="hstat-num">329K</span>
-        <span class="hstat-lbl">Threats Blocked</span>
-      </div>
-      <div class="hstat">
-        <span class="hstat-num">27</span>
-        <span class="hstat-lbl">News Feeds</span>
-      </div>
-      <div class="hstat">
-        <span class="hstat-num">100%</span>
-        <span class="hstat-lbl">Remote Access</span>
-      </div>
+    <div class="stat-item">
+      <span class="stat-num">329K</span>
+      <div class="stat-label">Threats Blocked</div>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">27</span>
+      <div class="stat-label">News Feeds</div>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">100%</span>
+      <div class="stat-label">Remote Access</div>
     </div>
   </div>
-</div>
+  <div class="scroll-hint" id="scroll-hint">SCROLL TO EXPLORE ↓</div>
+</section>
 
-<!-- ══════════════════════════════════════════
-     SLIDE 2 — ARCHITECTURE OVERVIEW
-══════════════════════════════════════════ -->
-<div class="slide" id="s2">
-  <div class="slide-header slide-full">
+<!-- ════════════════════════════ ARCHITECTURE ════════════════════════════ -->
+<section id="architecture">
+  <div class="section-inner">
     <div class="eyebrow">01 — Architecture Overview</div>
-    <h2>Four Layers of Defense</h2>
+    <h2 class="glitch-decode" data-text="Four Layers of Defense">Four Layers of Defense</h2>
+    <div class="arch-grid" id="arch-grid">
+      <div class="arch-card">
+        <div class="card-icon">🔐</div>
+        <h3>Encrypted Connection</h3>
+        <p>WARP tunnel combined with Tailscale subnet router provides end-to-end encrypted remote access to the entire 192.168.100.0/24 network.</p>
+        <div class="card-tags">
+          <span class="tag">WARP</span>
+          <span class="tag">TAILSCALE</span>
+          <span class="tag">UFW</span>
+        </div>
+      </div>
+      <div class="arch-card">
+        <div class="card-icon">🛡</div>
+        <h3>DNS Filtering</h3>
+        <p>AdGuard Home with 12 active blocklists intercepts all DNS queries, blocking 329K+ malicious domains before any connection is made.</p>
+        <div class="card-tags">
+          <span class="tag">ADGUARD</span>
+          <span class="tag">329K RULES</span>
+        </div>
+      </div>
+      <div class="arch-card">
+        <div class="card-icon">📦</div>
+        <h3>App Isolation</h3>
+        <p>Infrastructure services run in rootless Podman containers on dedicated VMs. Kubernetes workloads are isolated in separate namespaces under QEMU/KVM.</p>
+        <div class="card-tags">
+          <span class="tag">PODMAN</span>
+          <span class="tag">KVM</span>
+          <span class="tag">APPARMOR</span>
+        </div>
+      </div>
+      <div class="arch-card">
+        <div class="card-icon">📡</div>
+        <h3>Private Services</h3>
+        <p>All services are self-hosted with zero cloud dependency. RSS reading, private search, and DNS resolution happen entirely within the homelab.</p>
+        <div class="card-tags">
+          <span class="tag">MINIFLUX</span>
+          <span class="tag">SEARXNG</span>
+        </div>
+      </div>
+    </div>
   </div>
+</section>
 
-  <div class="four-col">
-    <div class="arch-card c-cyan">
-      <div class="arch-num">01</div>
-      <div class="arch-icon">🔐</div>
-      <h3>Encrypted Connection</h3>
-      <p>WARP + Tailscale tunnel encrypts all outbound traffic. UFW denies all unsolicited inbound connections.</p>
-      <span class="arch-tag">WARP · TAILSCALE · UFW</span>
-    </div>
-    <div class="arch-card c-green">
-      <div class="arch-num">02</div>
-      <div class="arch-icon">🛡</div>
-      <h3>DNS Filtering</h3>
-      <p>AdGuard Home intercepts all DNS requests. 12 blocklists cover ads, malware, phishing, stalkerware.</p>
-      <span class="arch-tag">ADGUARD · 329K RULES</span>
-    </div>
-    <div class="arch-card c-purple">
-      <div class="arch-num">03</div>
-      <div class="arch-icon">📦</div>
-      <h3>App Isolation</h3>
-      <p>Rootless Podman + QEMU/KVM VMs. AppArmor on all workloads. VMs blocked from reaching host.</p>
-      <span class="arch-tag">PODMAN · KVM · APPARMOR</span>
-    </div>
-    <div class="arch-card c-orange">
-      <div class="arch-num">04</div>
-      <div class="arch-icon">📡</div>
-      <h3>Private Services</h3>
-      <p>Self-hosted RSS, search, DNS and monitoring. Zero third-party tracking. Data stays at home.</p>
-      <span class="arch-tag">MINIFLUX · SEARXNG</span>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════
-     SLIDE 3 — NETWORK FLOW
-══════════════════════════════════════════ -->
-<div class="slide" id="s3">
-  <div class="slide-header slide-full">
+<!-- ════════════════════════════ NETWORK ════════════════════════════ -->
+<section id="network">
+  <div class="section-inner">
     <div class="eyebrow">02 — Traffic Flow</div>
-    <h2>How Traffic Moves</h2>
-  </div>
-
-  <div class="flow-layout" style="position:relative;z-index:1;width:100%;">
-
-    <div class="flow-nodes">
-      <div class="flow-node">
-        <div class="fn-icon" style="background:rgba(0,212,255,0.1);">💻</div>
-        <div class="fn-body">
-          <div class="fn-label">Surface Laptop 4</div>
-          <div class="fn-sub">Ubuntu 24.04 LTS</div>
+    <h2 class="glitch-decode" data-text="How Traffic Moves">How Traffic Moves</h2>
+    <div class="network-layout">
+      <div class="flow-nodes" id="flow-nodes">
+        <div class="flow-node">
+          <div class="flow-icon">💻</div>
+          <div>
+            <div class="flow-label">Surface Laptop 4</div>
+            <div class="flow-desc">Ubuntu 24.04 LTS · Client device</div>
+          </div>
         </div>
-        <div class="fn-status"></div>
+        <div class="flow-node">
+          <div class="flow-icon">🔒</div>
+          <div>
+            <div class="flow-label">WARP / Tailscale</div>
+            <div class="flow-desc">Encrypted Tunnel · Zero-trust access</div>
+          </div>
+        </div>
+        <div class="flow-node">
+          <div class="flow-icon">🛡</div>
+          <div>
+            <div class="flow-label">AdGuard Home</div>
+            <div class="flow-desc">DNS Filter · 192.168.100.135:3001</div>
+          </div>
+        </div>
+        <div class="flow-node">
+          <div class="flow-icon">☸️</div>
+          <div>
+            <div class="flow-label">K3s Kubernetes</div>
+            <div class="flow-desc">192.168.100.133 · Traefik ingress</div>
+          </div>
+        </div>
+        <div class="flow-node">
+          <div class="flow-icon">🌐</div>
+          <div>
+            <div class="flow-label">Services Layer</div>
+            <div class="flow-desc">Miniflux · SearXNG · Grafana · ArgoCD</div>
+          </div>
+        </div>
       </div>
 
-      <div class="flow-node" style="margin-top:16px;">
-        <div class="fn-icon" style="background:rgba(0,212,255,0.1);">🔒</div>
-        <div class="fn-body">
-          <div class="fn-label">WARP / Tailscale</div>
-          <div class="fn-sub">Encrypted Tunnel</div>
-        </div>
-        <div class="fn-status"></div>
-      </div>
+      <div class="network-svg-wrap">
+        <svg viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <style>
+              .svg-label { font-family: 'Space Mono', monospace; font-size: 11px; fill: #5a6a80; }
+              .svg-title { font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; fill: #e8edf5; }
+              .svg-sub { font-family: 'Space Mono', monospace; font-size: 9px; fill: #5a6a80; }
+              @keyframes dash-anim { to { stroke-dashoffset: -40; } }
+              .animated-dash { animation: dash-anim 1.5s linear infinite; }
+            </style>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
 
-      <div class="flow-node" style="margin-top:16px;">
-        <div class="fn-icon" style="background:rgba(0,255,157,0.1);">🛡</div>
-        <div class="fn-body">
-          <div class="fn-label">AdGuard Home</div>
-          <div class="fn-sub">DNS Filter · :3001</div>
-        </div>
-        <div class="fn-status"></div>
-      </div>
+          <!-- Node: Client -->
+          <rect x="130" y="20" width="140" height="52" rx="4" fill="#080d14" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+          <text x="200" y="43" text-anchor="middle" class="svg-title">Surface Laptop</text>
+          <text x="200" y="58" text-anchor="middle" class="svg-sub">Ubuntu 24.04</text>
 
-      <div class="flow-node" style="margin-top:16px;">
-        <div class="fn-icon" style="background:rgba(124,106,255,0.1);">☸️</div>
-        <div class="fn-body">
-          <div class="fn-label">K3s Kubernetes</div>
-          <div class="fn-sub">192.168.100.133</div>
-        </div>
-        <div class="fn-status"></div>
-      </div>
+          <!-- Arrow -->
+          <line x1="200" y1="72" x2="200" y2="108" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="8,4" class="animated-dash"/>
+          <polygon points="200,112 195,104 205,104" fill="#00d4ff"/>
+          <text x="215" y="95" class="svg-label">WARP / Tailscale</text>
 
-      <div class="flow-node" style="margin-top:16px;">
-        <div class="fn-icon" style="background:rgba(255,140,66,0.1);">🌐</div>
-        <div class="fn-body">
-          <div class="fn-label">Services Layer</div>
-          <div class="fn-sub">Miniflux · SearXNG · Grafana</div>
-        </div>
-        <div class="fn-status"></div>
+          <!-- Node: VPN -->
+          <rect x="130" y="116" width="140" height="52" rx="4" fill="#080d14" stroke="rgba(124,106,255,0.4)" stroke-width="1" filter="url(#glow)"/>
+          <text x="200" y="139" text-anchor="middle" class="svg-title" fill="#7c6aff">VPN Gateway</text>
+          <text x="200" y="154" text-anchor="middle" class="svg-sub">LXC 101 · :41641</text>
+
+          <!-- Arrow -->
+          <line x1="200" y1="168" x2="200" y2="204" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="8,4" class="animated-dash"/>
+          <polygon points="200,208 195,200 205,200" fill="#00d4ff"/>
+          <text x="215" y="191" class="svg-label">DNS query</text>
+
+          <!-- Node: AdGuard -->
+          <rect x="130" y="212" width="140" height="52" rx="4" fill="#080d14" stroke="rgba(0,255,157,0.3)" stroke-width="1"/>
+          <text x="200" y="235" text-anchor="middle" class="svg-title" fill="#00ff9d">AdGuard Home</text>
+          <text x="200" y="250" text-anchor="middle" class="svg-sub">LXC 102 · :3001</text>
+
+          <!-- Arrow -->
+          <line x1="200" y1="264" x2="200" y2="300" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="8,4" class="animated-dash"/>
+          <polygon points="200,304 195,296 205,296" fill="#00d4ff"/>
+          <text x="215" y="287" class="svg-label">HTTP/S request</text>
+
+          <!-- Node: K3s -->
+          <rect x="110" y="308" width="180" height="52" rx="4" fill="#080d14" stroke="rgba(0,212,255,0.5)" stroke-width="1.5" filter="url(#glow)"/>
+          <text x="200" y="331" text-anchor="middle" class="svg-title">K3s Cluster</text>
+          <text x="200" y="346" text-anchor="middle" class="svg-sub">192.168.100.133 · Traefik</text>
+
+          <!-- Branches -->
+          <line x1="160" y1="360" x2="100" y2="400" stroke="#00d4ff" stroke-width="1" stroke-dasharray="6,3" class="animated-dash"/>
+          <line x1="200" y1="360" x2="200" y2="400" stroke="#00d4ff" stroke-width="1" stroke-dasharray="6,3" class="animated-dash"/>
+          <line x1="240" y1="360" x2="300" y2="400" stroke="#00d4ff" stroke-width="1" stroke-dasharray="6,3" class="animated-dash"/>
+
+          <!-- Service nodes -->
+          <rect x="44" y="400" width="112" height="44" rx="3" fill="#080d14" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+          <text x="100" y="419" text-anchor="middle" class="svg-title" font-size="10">Miniflux</text>
+          <text x="100" y="434" text-anchor="middle" class="svg-sub">:30900</text>
+
+          <rect x="144" y="400" width="112" height="44" rx="3" fill="#080d14" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+          <text x="200" y="419" text-anchor="middle" class="svg-title" font-size="10">SearXNG</text>
+          <text x="200" y="434" text-anchor="middle" class="svg-sub">:30910</text>
+
+          <rect x="244" y="400" width="112" height="44" rx="3" fill="#080d14" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+          <text x="300" y="419" text-anchor="middle" class="svg-title" font-size="10">Grafana</text>
+          <text x="300" y="434" text-anchor="middle" class="svg-sub">:30300</text>
+        </svg>
       </div>
     </div>
-
-    <div class="flow-diagram">
-      <svg class="flow-svg" viewBox="0 0 520 300" xmlns="http://www.w3.org/2000/svg">
-        <!-- World -->
-        <rect x="20" y="20" width="100" height="40" rx="8" class="flow-box"/>
-        <text x="70" y="37" text-anchor="middle" class="flow-text" font-size="11">🌍 Internet</text>
-        <text x="70" y="52" text-anchor="middle" class="flow-sub">Public Web</text>
-
-        <!-- Arrow right -->
-        <line x1="122" y1="40" x2="148" y2="40" stroke="rgba(0,212,255,0.5)" stroke-width="1.5" marker-end="url(#arrow)"/>
-
-        <!-- WARP -->
-        <rect x="150" y="20" width="100" height="40" rx="8" fill="#080d14" stroke="rgba(0,212,255,0.4)" stroke-width="1"/>
-        <text x="200" y="37" text-anchor="middle" class="flow-text" font-size="11">🔐 WARP</text>
-        <text x="200" y="52" text-anchor="middle" class="flow-sub">Encrypted</text>
-
-        <!-- Arrow down -->
-        <line x1="200" y1="62" x2="200" y2="88" stroke="rgba(0,212,255,0.5)" stroke-width="1.5" class="flow-line"/>
-
-        <!-- AdGuard -->
-        <rect x="150" y="90" width="100" height="40" rx="8" fill="#080d14" stroke="rgba(0,255,157,0.4)" stroke-width="1"/>
-        <text x="200" y="107" text-anchor="middle" class="flow-text" font-size="11">🛡 AdGuard</text>
-        <text x="200" y="122" text-anchor="middle" class="flow-sub">DNS :53</text>
-
-        <!-- Arrow right to proxmox -->
-        <line x1="252" y1="110" x2="288" y2="110" stroke="rgba(0,255,157,0.5)" stroke-width="1.5" marker-end="url(#arrow2)" class="flow-line"/>
-
-        <!-- Proxmox block -->
-        <rect x="290" y="20" width="210" height="260" rx="12" fill="#0a0f18" stroke="rgba(124,106,255,0.35)" stroke-width="1"/>
-        <text x="395" y="38" text-anchor="middle" class="flow-label">PROXMOX HOST</text>
-
-        <!-- K3s VM -->
-        <rect x="306" y="50" width="178" height="50" rx="8" fill="#0d1520" stroke="rgba(0,212,255,0.2)" stroke-width="1"/>
-        <text x="395" y="72" text-anchor="middle" class="flow-text" font-size="11">☸️ K3s · 192.168.100.133</text>
-        <text x="395" y="88" text-anchor="middle" class="flow-sub">kubes-vm · 4c/8GB</text>
-
-        <!-- Services inside k3s -->
-        <rect x="306" y="115" width="80" height="36" rx="6" fill="#0d1520" stroke="rgba(0,212,255,0.15)" stroke-width="1"/>
-        <text x="346" y="130" text-anchor="middle" class="flow-text" font-size="10">📰 Miniflux</text>
-        <text x="346" y="143" text-anchor="middle" class="flow-sub">:30900</text>
-
-        <rect x="404" y="115" width="80" height="36" rx="6" fill="#0d1520" stroke="rgba(0,212,255,0.15)" stroke-width="1"/>
-        <text x="444" y="130" text-anchor="middle" class="flow-text" font-size="10">🔍 SearXNG</text>
-        <text x="444" y="143" text-anchor="middle" class="flow-sub">:30910</text>
-
-        <rect x="306" y="165" width="80" height="36" rx="6" fill="#0d1520" stroke="rgba(255,140,66,0.2)" stroke-width="1"/>
-        <text x="346" y="180" text-anchor="middle" class="flow-text" font-size="10">📊 Grafana</text>
-        <text x="346" y="193" text-anchor="middle" class="flow-sub">:30300</text>
-
-        <rect x="404" y="165" width="80" height="36" rx="6" fill="#0d1520" stroke="rgba(255,140,66,0.2)" stroke-width="1"/>
-        <text x="444" y="180" text-anchor="middle" class="flow-text" font-size="10">⚙️ ArgoCD</text>
-        <text x="444" y="193" text-anchor="middle" class="flow-sub">:30443</text>
-
-        <!-- VPN VM -->
-        <rect x="306" y="218" width="80" height="36" rx="8" fill="#0d1520" stroke="rgba(0,212,255,0.2)" stroke-width="1"/>
-        <text x="346" y="234" text-anchor="middle" class="flow-text" font-size="10">🔗 Tailscale</text>
-        <text x="346" y="248" text-anchor="middle" class="flow-sub">vpn-vm</text>
-
-        <!-- metrics VM -->
-        <rect x="404" y="218" width="80" height="36" rx="8" fill="#0d1520" stroke="rgba(0,212,255,0.2)" stroke-width="1"/>
-        <text x="444" y="234" text-anchor="middle" class="flow-text" font-size="10">📈 Prometheus</text>
-        <text x="444" y="248" text-anchor="middle" class="flow-sub">metrics-vm</text>
-
-        <!-- Phone -->
-        <rect x="20" y="120" width="100" height="40" rx="8" class="flow-box"/>
-        <text x="70" y="137" text-anchor="middle" class="flow-text" font-size="11">📱 iPhone</text>
-        <text x="70" y="152" text-anchor="middle" class="flow-sub">Tailscale</text>
-
-        <line x1="122" y1="140" x2="148" y2="120" stroke="rgba(0,212,255,0.3)" stroke-width="1" stroke-dasharray="4 3"/>
-
-        <!-- Arrow markers -->
-        <defs>
-          <marker id="arrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L6,3 z" fill="rgba(0,212,255,0.6)"/>
-          </marker>
-          <marker id="arrow2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L6,3 z" fill="rgba(0,255,157,0.6)"/>
-          </marker>
-        </defs>
-      </svg>
-    </div>
-
   </div>
-</div>
+</section>
 
-<!-- ══════════════════════════════════════════
-     SLIDE 4 — PROXMOX + K8S
-══════════════════════════════════════════ -->
-<div class="slide" id="s4">
-  <div class="slide-header slide-full">
+<!-- ════════════════════════════ INFRASTRUCTURE ════════════════════════════ -->
+<section id="infrastructure">
+  <div class="section-inner">
     <div class="eyebrow">03 — Virtualization Layer</div>
-    <h2>Proxmox Host + Kubernetes</h2>
-  </div>
+    <h2 class="glitch-decode" data-text="Proxmox Host + Kubernetes">Proxmox Host + Kubernetes</h2>
+    <div class="infra-layout">
 
-  <div class="infra-layout">
-    <div class="proxmox-box">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;padding-top:8px;">
-        Amadeus · 6 Virtual Machines · AppArmor Active
+      <!-- Proxmox box -->
+      <div class="infra-box">
+        <div class="infra-box-title">PROXMOX HYPERVISOR · 192.168.100.163</div>
+        <div class="vm-grid" id="vm-grid">
+
+          <div class="vm-card">
+            <div class="vm-header">
+              <span class="vm-name">kubes</span>
+              <span class="badge badge-running">RUNNING</span>
+            </div>
+            <div class="vm-role">K3s Server · VM 100</div>
+            <div class="vm-specs">4 vCPU · 8 GB · Ubuntu 22.04</div>
+            <div class="vm-bar-wrap"><div class="vm-bar" style="width:65%"></div></div>
+          </div>
+
+          <div class="vm-card">
+            <div class="vm-header">
+              <span class="vm-name">vpn</span>
+              <span class="badge badge-running">RUNNING</span>
+            </div>
+            <div class="vm-role">Tailscale Gateway · LXC 101</div>
+            <div class="vm-specs">2 vCPU · 1 GB · Debian 12</div>
+            <div class="vm-bar-wrap"><div class="vm-bar" style="width:20%"></div></div>
+          </div>
+
+          <div class="vm-card">
+            <div class="vm-header">
+              <span class="vm-name">adguard</span>
+              <span class="badge badge-running">RUNNING</span>
+            </div>
+            <div class="vm-role">AdGuard Home · LXC 102</div>
+            <div class="vm-specs">2 vCPU · 512 MB · Alpine</div>
+            <div class="vm-bar-wrap"><div class="vm-bar" style="width:15%"></div></div>
+          </div>
+
+          <div class="vm-card">
+            <div class="vm-header">
+              <span class="vm-name">metrics-vm</span>
+              <span class="badge badge-running">RUNNING</span>
+            </div>
+            <div class="vm-role">Prometheus Node · VM 103</div>
+            <div class="vm-specs">2 vCPU · 2 GB · Ubuntu 22.04</div>
+            <div class="vm-bar-wrap"><div class="vm-bar" style="width:40%"></div></div>
+          </div>
+
+          <div class="vm-card">
+            <div class="vm-header">
+              <span class="vm-name">win2k25</span>
+              <span class="badge badge-running">RUNNING</span>
+            </div>
+            <div class="vm-role">Windows Server 2025 · VM</div>
+            <div class="vm-specs">5 vCPU · 6 GB · Windows Server</div>
+            <div class="vm-bar-wrap"><div class="vm-bar" style="width:55%"></div></div>
+          </div>
+
+          <div class="vm-card">
+            <div class="vm-header">
+              <span class="vm-name">tails</span>
+              <span class="badge badge-stopped">STOPPED</span>
+            </div>
+            <div class="vm-role">Tails OS · VM</div>
+            <div class="vm-specs">4 vCPU · 4 GB · Tails Linux</div>
+            <div class="vm-bar-wrap"><div class="vm-bar" style="width:30%; background: var(--muted)"></div></div>
+          </div>
+
+        </div>
       </div>
-      <div class="vm-grid">
-        <div class="vm-card">
-          <div class="vm-title">kubes</div>
-          <div class="vm-os">K3s Server</div>
-          <div class="vm-res">4c · 8 GB · Ubuntu</div>
-          <div class="res-bar"><div class="res-fill" style="width:65%"></div></div>
-        </div>
-        <div class="vm-card">
-          <div class="vm-title">vpn</div>
-          <div class="vm-os">Tailscale Gateway</div>
-          <div class="vm-res">2c · 1 GB · Debian</div>
-          <div class="res-bar"><div class="res-fill" style="width:20%"></div></div>
-        </div>
-        <div class="vm-card">
-          <div class="vm-title">adguard</div>
-          <div class="vm-os">AdGuard Home</div>
-          <div class="vm-res">2c · 512 MB · Alpine</div>
-          <div class="res-bar"><div class="res-fill" style="width:15%"></div></div>
-        </div>
-        <div class="vm-card">
-          <div class="vm-title">metrics-vm</div>
-          <div class="vm-os">Prometheus Node</div>
-          <div class="vm-res">2c · 2 GB · Ubuntu</div>
-          <div class="res-bar"><div class="res-fill" style="width:40%"></div></div>
-        </div>
-        <div class="vm-card">
-          <div class="vm-title">win2k25</div>
-          <div class="vm-os">Windows Server 2025</div>
-          <div class="vm-res">5c · 6 GB · Software compat</div>
-          <div class="res-bar"><div class="res-fill" style="width:55%"></div></div>
-        </div>
-        <div class="vm-card">
-          <div class="vm-title">tails</div>
-          <div class="vm-os">Tails OS</div>
-          <div class="vm-res">4c · 4 GB · Paranoia research</div>
-          <div class="res-bar"><div class="res-fill" style="width:30%"></div></div>
+
+      <!-- K3s box -->
+      <div class="infra-box">
+        <div class="infra-box-title">K3S CLUSTER · 192.168.100.133</div>
+        <div class="pod-grid" id="pod-grid">
+          <div class="pod">
+            <div class="pod-name"><span class="pod-status"></span>argocd</div>
+            <div class="pod-ns">ns: argocd · :30443</div>
+          </div>
+          <div class="pod">
+            <div class="pod-name"><span class="pod-status"></span>cert-manager</div>
+            <div class="pod-ns">ns: cert-manager</div>
+          </div>
+          <div class="pod">
+            <div class="pod-name"><span class="pod-status"></span>miniflux</div>
+            <div class="pod-ns">ns: prod · :30900</div>
+          </div>
+          <div class="pod">
+            <div class="pod-name"><span class="pod-status"></span>miniflux-db</div>
+            <div class="pod-ns">ns: prod · 5Gi PVC</div>
+          </div>
+          <div class="pod">
+            <div class="pod-name"><span class="pod-status"></span>searxng</div>
+            <div class="pod-ns">ns: tools · :30910</div>
+          </div>
+          <div class="pod">
+            <div class="pod-name"><span class="pod-status"></span>grafana</div>
+            <div class="pod-ns">ns: monitoring · :30300</div>
+          </div>
+          <div class="pod">
+            <div class="pod-name"><span class="pod-status"></span>prometheus</div>
+            <div class="pod-ns">ns: monitoring · :30091</div>
+          </div>
+          <div class="pod">
+            <div class="pod-name"><span class="pod-status"></span>traefik</div>
+            <div class="pod-ns">ns: kube-system · ingress</div>
+          </div>
+          <div class="pod">
+            <div class="pod-name"><span class="pod-status"></span>calibre-web</div>
+            <div class="pod-ns">ns: media · :30920</div>
+          </div>
+          <div class="pod">
+            <div class="pod-name"><span class="pod-status"></span>node-exporter</div>
+            <div class="pod-ns">ns: monitoring</div>
+          </div>
         </div>
       </div>
+
     </div>
-
-    <div class="k8s-box">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;padding-top:8px;">
-        K3s v1.34.3 · ArgoCD GitOps · cert-manager TLS
-      </div>
-      <div class="pod-grid">
-        <div class="pod">
-          <div class="pod-icon">📰</div>
-          <div>
-            <div class="pod-name">Miniflux</div>
-            <div class="pod-ver">:30900</div>
-          </div>
-          <div class="pod-status"></div>
-        </div>
-        <div class="pod">
-          <div class="pod-icon">🔍</div>
-          <div>
-            <div class="pod-name">SearXNG</div>
-            <div class="pod-ver">:30910</div>
-          </div>
-          <div class="pod-status"></div>
-        </div>
-        <div class="pod">
-          <div class="pod-icon">📊</div>
-          <div>
-            <div class="pod-name">Grafana</div>
-            <div class="pod-ver">:30300</div>
-          </div>
-          <div class="pod-status"></div>
-        </div>
-        <div class="pod">
-          <div class="pod-icon">⚙️</div>
-          <div>
-            <div class="pod-name">ArgoCD</div>
-            <div class="pod-ver">:30443</div>
-          </div>
-          <div class="pod-status"></div>
-        </div>
-        <div class="pod">
-          <div class="pod-icon">📈</div>
-          <div>
-            <div class="pod-name">Prometheus</div>
-            <div class="pod-ver">:9090</div>
-          </div>
-          <div class="pod-status"></div>
-        </div>
-        <div class="pod">
-          <div class="pod-icon">🔬</div>
-          <div>
-            <div class="pod-name">Metadata</div>
-            <div class="pod-ver">ExifTool LXC</div>
-          </div>
-          <div class="pod-status"></div>
-        </div>
-        <div class="pod" style="grid-column:span 2;">
-          <div class="pod-icon">🔐</div>
-          <div>
-            <div class="pod-name">cert-manager · Amadeus Root CA</div>
-            <div class="pod-ver">HTTPS on all services · valid 2036</div>
-          </div>
-          <div class="pod-status"></div>
-        </div>
-      </div>
-    </div>
   </div>
-</div>
+</section>
 
-<!-- ══════════════════════════════════════════
-     SLIDE 5 — SERVICES MESH
-══════════════════════════════════════════ -->
-<div class="slide" id="s5">
-  <div class="slide-header slide-full">
-    <div class="eyebrow">04 — Service Layer</div>
-    <h2>All Active Services</h2>
-  </div>
+<!-- ════════════════════════════ SERVICES ════════════════════════════ -->
+<section id="services">
+  <div class="section-inner">
+    <div class="eyebrow">04 — Running Services</div>
+    <h2 class="glitch-decode" data-text="Active Service Mesh">Active Service Mesh</h2>
+    <div class="svc-grid" id="svc-grid">
 
-  <div class="mesh-container">
-    <div class="services-grid">
-
-      <div class="svc-card svc-s1">
-        <div class="svc-top">
-          <div class="svc-icon-wrap" style="background:rgba(0,212,255,0.1);">🛡</div>
-          <div class="svc-live"><span class="pulse-dot"></span>LIVE</div>
-        </div>
-        <div class="svc-name">AdGuard Home</div>
-        <div class="svc-desc">DNS-level ad & threat blocker. 329K rules across 6 protection lists.</div>
-        <div class="svc-port">:3001</div>
-      </div>
-
-      <div class="svc-card svc-s2">
-        <div class="svc-top">
-          <div class="svc-icon-wrap" style="background:rgba(0,255,157,0.1);">🔍</div>
-          <div class="svc-live"><span class="pulse-dot"></span>LIVE</div>
-        </div>
-        <div class="svc-name">SearXNG</div>
-        <div class="svc-desc">Private meta-search engine. Queries Google, Bing+ without tracking.</div>
-        <div class="svc-port">:30910</div>
-      </div>
-
-      <div class="svc-card svc-s3">
-        <div class="svc-top">
-          <div class="svc-icon-wrap" style="background:rgba(124,106,255,0.1);">📰</div>
-          <div class="svc-live"><span class="pulse-dot"></span>LIVE</div>
-        </div>
+      <div class="svc-card">
+        <div class="svc-icon">📰</div>
         <div class="svc-name">Miniflux</div>
-        <div class="svc-desc">Self-hosted RSS reader. 27 feeds across 6 categories. No algorithm.</div>
-        <div class="svc-port">:30900</div>
+        <div class="svc-desc">Self-hosted RSS reader. 27 active feeds, minimal and fast.</div>
+        <div class="svc-meta">
+          <span class="svc-port">:30900 · prod</span>
+          <span class="live-dot">LIVE</span>
+        </div>
       </div>
 
-      <div class="svc-card svc-s4">
-        <div class="svc-top">
-          <div class="svc-icon-wrap" style="background:rgba(255,140,66,0.1);">🔗</div>
-          <div class="svc-live"><span class="pulse-dot"></span>LIVE</div>
+      <div class="svc-card">
+        <div class="svc-icon">🔍</div>
+        <div class="svc-name">SearXNG</div>
+        <div class="svc-desc">Private metasearch engine. No tracking, no logs.</div>
+        <div class="svc-meta">
+          <span class="svc-port">:30910 · tools</span>
+          <span class="live-dot">LIVE</span>
         </div>
-        <div class="svc-name">Tailscale</div>
-        <div class="svc-desc">Zero-config VPN mesh. Access all services from anywhere, no port forwarding.</div>
-        <div class="svc-port">WireGuard</div>
       </div>
 
-      <div class="svc-card svc-s5">
-        <div class="svc-top">
-          <div class="svc-icon-wrap" style="background:rgba(255,77,109,0.1);">📊</div>
-          <div class="svc-live"><span class="pulse-dot"></span>LIVE</div>
+      <div class="svc-card">
+        <div class="svc-icon">📚</div>
+        <div class="svc-name">Calibre-Web</div>
+        <div class="svc-desc">E-book library with OPDS catalog and reader interface.</div>
+        <div class="svc-meta">
+          <span class="svc-port">:30920 · media</span>
+          <span class="live-dot">LIVE</span>
         </div>
-        <div class="svc-name">Grafana</div>
-        <div class="svc-desc">Live infrastructure dashboards. 4 nodes monitored. 2 dashboards active.</div>
-        <div class="svc-port">:30300</div>
       </div>
 
-      <div class="svc-card svc-s6">
-        <div class="svc-top">
-          <div class="svc-icon-wrap" style="background:rgba(0,212,255,0.1);">📈</div>
-          <div class="svc-live"><span class="pulse-dot"></span>LIVE</div>
-        </div>
-        <div class="svc-name">Prometheus</div>
-        <div class="svc-desc">Metrics collection every 15s. Alerts on CPU, RAM, disk, pod crashes.</div>
-        <div class="svc-port">:9090</div>
-      </div>
-
-      <div class="svc-card svc-s7">
-        <div class="svc-top">
-          <div class="svc-icon-wrap" style="background:rgba(0,255,157,0.1);">⚙️</div>
-          <div class="svc-live"><span class="pulse-dot"></span>LIVE</div>
-        </div>
+      <div class="svc-card">
+        <div class="svc-icon">🚀</div>
         <div class="svc-name">ArgoCD</div>
-        <div class="svc-desc">GitOps auto-deploy. Every commit triggers deployment. Full audit trail.</div>
-        <div class="svc-port">:30443</div>
+        <div class="svc-desc">GitOps continuous delivery. Manages all K3s workloads from Git.</div>
+        <div class="svc-meta">
+          <span class="svc-port">:30443 · argocd</span>
+          <span class="live-dot">LIVE</span>
+        </div>
       </div>
 
-      <div class="svc-card svc-s8">
-        <div class="svc-top">
-          <div class="svc-icon-wrap" style="background:rgba(124,106,255,0.1);">🔬</div>
-          <div class="svc-live"><span class="pulse-dot"></span>LIVE</div>
+      <div class="svc-card">
+        <div class="svc-icon">📊</div>
+        <div class="svc-name">Grafana K8s</div>
+        <div class="svc-desc">Kubernetes monitoring dashboard. kube-prometheus-stack.</div>
+        <div class="svc-meta">
+          <span class="svc-port">:30300 · monitoring</span>
+          <span class="live-dot">LIVE</span>
         </div>
+      </div>
+
+      <div class="svc-card">
+        <div class="svc-icon">📈</div>
+        <div class="svc-name">Prometheus</div>
+        <div class="svc-desc">Metrics collection and alerting for K8s workloads.</div>
+        <div class="svc-meta">
+          <span class="svc-port">:30091 · monitoring</span>
+          <span class="live-dot">LIVE</span>
+        </div>
+      </div>
+
+      <div class="svc-card">
+        <div class="svc-icon">🛡</div>
+        <div class="svc-name">AdGuard</div>
+        <div class="svc-desc">Network-wide DNS filtering. 329K+ domains blocked.</div>
+        <div class="svc-meta">
+          <span class="svc-port">:3001 · LXC 102</span>
+          <span class="live-dot">LIVE</span>
+        </div>
+      </div>
+
+      <div class="svc-card">
+        <div class="svc-icon">🔬</div>
         <div class="svc-name">Metadata Inspector</div>
-        <div class="svc-desc">ExifTool in isolated LXC. Strips GPS, author data from files. Auto-deletes.</div>
-        <div class="svc-port">LXC 104</div>
+        <div class="svc-desc">ExifTool FastAPI service. EXIF data extraction via REST.</div>
+        <div class="svc-meta">
+          <span class="svc-port">:443 · LXC 104</span>
+          <span class="live-dot">LIVE</span>
+        </div>
       </div>
 
     </div>
   </div>
-</div>
+</section>
 
-<!-- ══════════════════════════════════════════
-     SLIDE 6 — SECURITY DEEP DIVE
-══════════════════════════════════════════ -->
-<div class="slide" id="s6">
-  <div class="slide-header slide-full">
-    <div class="eyebrow">05 — Security</div>
-    <h2>Defense in Depth</h2>
-  </div>
+<!-- ════════════════════════════ SECURITY ════════════════════════════ -->
+<section id="security">
+  <div class="section-inner">
+    <div class="eyebrow">05 — Security Architecture</div>
+    <h2 class="glitch-decode" data-text="Defense in Depth">Defense in Depth</h2>
+    <div class="security-layout">
 
-  <div class="sec-layout">
-    <div class="sec-panel">
-      <h3><span style="font-size:20px;">🔐</span> Laptop Security Stack</h3>
-      <ul class="sec-list">
-        <li>
-          <div class="sec-check">✓</div>
-          <div>
-            <strong>WARP Tunnel</strong><br>
-            <span style="color:var(--muted);font-size:11px;">All outbound traffic encrypted · prevents ISP surveillance</span>
-          </div>
-        </li>
-        <li>
-          <div class="sec-check">✓</div>
-          <div>
-            <strong>UFW Firewall</strong><br>
-            <span style="color:var(--muted);font-size:11px;">Deny all inbound · zero attack surface</span>
-          </div>
-        </li>
-        <li>
-          <div class="sec-check">✓</div>
-          <div>
-            <strong>Rootless Podman</strong><br>
-            <span style="color:var(--muted);font-size:11px;">No root daemon · zero privilege escalation risk</span>
-          </div>
-        </li>
-        <li>
-          <div class="sec-check">✓</div>
-          <div>
-            <strong>QEMU/KVM + AppArmor</strong><br>
-            <span style="color:var(--muted);font-size:11px;">3 VMs hardware-isolated · autostart disabled</span>
-          </div>
-        </li>
-        <li>
-          <div class="sec-check">✓</div>
-          <div>
-            <strong>Network Isolation</strong><br>
-            <span style="color:var(--muted);font-size:11px;">192.168.122.0/24 blocked · VMs can't reach host</span>
-          </div>
-        </li>
-      </ul>
-    </div>
+      <div class="sec-panel">
+        <div class="sec-panel-title">TLS / CERTIFICATE SECURITY</div>
 
-    <div class="sec-panel">
-      <h3><span style="font-size:20px;">🛡</span> AdGuard Stats</h3>
-      <div class="dns-stat">
-        <span class="dns-big">329K</span>
-        <div class="dns-sub">Active Blocked Domains</div>
+        <div class="tls-item">
+          <div class="tls-dot"></div>
+          <div>
+            <div class="tls-label">Amadeus Root CA</div>
+            <div class="tls-val">Self-signed · Valid 2026–2036 · RSA 4096</div>
+          </div>
+        </div>
+
+        <div class="tls-item">
+          <div class="tls-dot"></div>
+          <div>
+            <div class="tls-label">cert-manager ClusterIssuer</div>
+            <div class="tls-val">amadeus-ca-issuer · Automatic cert rotation</div>
+          </div>
+        </div>
+
+        <div class="tls-item">
+          <div class="tls-dot"></div>
+          <div>
+            <div class="tls-label">6 Services — HTTPS Ingress</div>
+            <div class="tls-val">miniflux.prod.local · searxng.tools.local · calibre.amadeus.local · argocd.local · grafana.k8s.local · prometheus.k8s.local</div>
+          </div>
+        </div>
+
+        <div class="tls-item">
+          <div class="tls-dot"></div>
+          <div>
+            <div class="tls-label">Ingress Pattern</div>
+            <div class="tls-val">&lt;service&gt;.&lt;namespace&gt;.local → Traefik → Pod</div>
+          </div>
+        </div>
+
+        <div class="tls-item">
+          <div class="tls-dot"></div>
+          <div>
+            <div class="tls-label">TLS Termination</div>
+            <div class="tls-val">Traefik ingress controller · All internal traffic</div>
+          </div>
+        </div>
       </div>
 
-      <div style="margin-top: 8px;">
+      <div class="sec-panel">
+        <div class="sec-panel-title">DNS SECURITY — ADGUARD HOME</div>
+        <div class="dns-big-num">329,392</div>
+        <div class="dns-label">Domains blocked across 12 blocklists</div>
+
         <div class="blocklist-row">
-          <span>Ads & Trackers</span>
-          <span class="bl-num">5 lists</span>
+          <span class="bl-name">Ads</span>
+          <div class="bl-bar-wrap"><div class="bl-bar" style="width:100%; background: linear-gradient(90deg, var(--cyan), var(--cyan2))"></div></div>
+          <span class="bl-count">150K</span>
         </div>
         <div class="blocklist-row">
-          <span>Phishing / Malware</span>
-          <span class="bl-num">4 lists</span>
+          <span class="bl-name">Malware</span>
+          <div class="bl-bar-wrap"><div class="bl-bar" style="width:53%; background: linear-gradient(90deg, var(--red), #cc3a55)"></div></div>
+          <span class="bl-count">80K</span>
         </div>
         <div class="blocklist-row">
-          <span>Crypto Miners</span>
-          <span class="bl-num">1 list</span>
+          <span class="bl-name">Phishing</span>
+          <div class="bl-bar-wrap"><div class="bl-bar" style="width:40%; background: linear-gradient(90deg, var(--orange), #cc6e30)"></div></div>
+          <span class="bl-count">60K</span>
         </div>
         <div class="blocklist-row">
-          <span>Stalkerware</span>
-          <span class="bl-num">1 list</span>
+          <span class="bl-name">Trackers</span>
+          <div class="bl-bar-wrap"><div class="bl-bar" style="width:26%; background: linear-gradient(90deg, var(--purple), #5c4ecc)"></div></div>
+          <span class="bl-count">39K</span>
         </div>
-        <div class="blocklist-row">
-          <span>DNS Rebind Protection</span>
-          <span class="bl-num">1 list</span>
-        </div>
-        <div class="blocklist-row" style="border:none;">
-          <span>DoH upstream</span>
-          <span class="bl-num">Cloudflare</span>
+
+        <div class="upstream-badge">
+          <span style="color:var(--green)">●</span>
+          UPSTREAM: 1.1.1.1 — Cloudflare DNS
         </div>
       </div>
-    </div>
-  </div>
-</div>
 
-<!-- ══════════════════════════════════════════
-     SLIDE 7 — CONCLUSION
-══════════════════════════════════════════ -->
-<div class="slide" id="s7">
-  <div class="conclusion-content">
-    <div class="eyebrow">Conclusion</div>
-    <h2>Not paranoia.<br><span style="color:var(--cyan);">Intentional engineering.</span></h2>
-    <p>A complete private infrastructure — built at home, accessible from anywhere, with zero cloud dependency and full control over every layer.</p>
-
-    <div class="conclusion-grid">
-      <div class="con-card">
-        <div class="con-icon">🔐</div>
-        <div class="con-title">Zero ISP Visibility</div>
-        <div class="con-desc">All traffic encrypted before leaving the device via WARP + Tailscale</div>
-      </div>
-      <div class="con-card">
-        <div class="con-icon">🛡</div>
-        <div class="con-title">DNS Defense</div>
-        <div class="con-desc">329K rules blocking ads, malware & stalkerware at network level</div>
-      </div>
-      <div class="con-card">
-        <div class="con-icon">📦</div>
-        <div class="con-title">Full Isolation</div>
-        <div class="con-desc">6 VMs + rootless containers with AppArmor on every workload</div>
-      </div>
-      <div class="con-card">
-        <div class="con-icon">🏠</div>
-        <div class="con-title">No Cloud</div>
-        <div class="con-desc">DNS, search, news, monitoring — all self-hosted, all private</div>
-      </div>
-    </div>
-
-    <div style="margin-top:32px;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:2px;">
-      ▲ AMΔDEUS INFRA · PROXMOX · K3s v1.34.3 · MARCH 2026
     </div>
   </div>
-</div>
+</section>
 
-</div><!-- end deck -->
+<!-- ════════════════════════════ SYSTEM ════════════════════════════ -->
+<section id="system">
+  <div class="section-inner">
+    <div class="eyebrow">06 — System Status</div>
+    <h2 class="glitch-decode" data-text="Infrastructure Online">Infrastructure Online</h2>
+
+    <div class="terminal-card">
+      <div class="terminal-titlebar">
+        <div class="term-dot red"></div>
+        <div class="term-dot yellow"></div>
+        <div class="term-dot green"></div>
+        <span class="term-title">root@amadeus — bash</span>
+      </div>
+      <div class="terminal-body" id="terminal-body">
+      </div>
+    </div>
+
+    <div class="conclusion-grid" id="conclusion-grid">
+      <div class="concl-card">
+        <div class="concl-icon">🔐</div>
+        <h3>Zero Trust</h3>
+        <p>Tailscale + UFW enforce strict access control. No inbound ports exposed. All traffic is authenticated.</p>
+      </div>
+      <div class="concl-card">
+        <div class="concl-icon">🛡</div>
+        <h3>DNS Shield</h3>
+        <p>329K+ domains blocked daily by AdGuard Home. Network-wide protection with 12 active blocklists.</p>
+      </div>
+      <div class="concl-card">
+        <div class="concl-icon">☸️</div>
+        <h3>Container Native</h3>
+        <p>K3s + ArgoCD GitOps keeps all workloads declarative. Rootless Podman for infrastructure services.</p>
+      </div>
+      <div class="concl-card">
+        <div class="concl-icon">📊</div>
+        <h3>Full Observability</h3>
+        <p>Dual Grafana + Prometheus stack. Infrastructure metrics on VM 103, Kubernetes metrics in cluster.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>AMΔDEUS HOMELAB · 192.168.100.0/24 · MARCH 2026</footer>
 
 <script>
-// ── LOADER ──
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    document.getElementById('loader').classList.add('hidden');
-    runHeroCounters();
-  }, 900);
-});
+/* ══════════════════════════════════════════════════════════
+   MATRIX RAIN
+══════════════════════════════════════════════════════════ */
+(function() {
+  const canvas = document.getElementById('matrix-canvas');
+  const ctx = canvas.getContext('2d');
+  const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンABCDEFabcdef0123456789!@#$%^&*';
+  const charArr = chars.split('');
+  let columns, drops, speeds;
+  const colW = 16;
+  const fontSize = 14;
 
-// ── DEVICE DETECTION ──
-// Detekton iPhone, iPad, Android — jo vetëm screen size
-const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-  || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPad me Safari desktop mode
-
-if (isMobile) {
-  document.body.classList.add('is-mobile');
-  if (window.screen.width <= 400) {
-    document.body.classList.add('small-phone');
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const isMobile = window.innerWidth < 768;
+    const colCount = Math.floor(canvas.width / colW);
+    const activeCount = isMobile ? Math.floor(colCount / 2) : colCount;
+    columns = activeCount;
+    drops = [];
+    speeds = [];
+    for (let i = 0; i < columns; i++) {
+      drops[i] = Math.random() * -canvas.height / fontSize;
+      speeds[i] = 1 + Math.random() * 2;
+    }
   }
-}
 
-// ── NUMBER COUNTER ANIMATION ──
-function animateCounter(el, target, duration) {
-  const isPercent = el.textContent.includes('%');
-  const isK = el.textContent.includes('K');
-  const start = 0;
-  const startTime = performance.now();
-  function update(now) {
-    const elapsed = now - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3);
-    const current = Math.round(start + (target - start) * eased);
-    el.textContent = isK ? current + 'K' : isPercent ? current + '%' : current;
-    if (progress < 1) requestAnimationFrame(update);
+  function draw() {
+    ctx.fillStyle = 'rgba(2,4,8,0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = fontSize + 'px Space Mono, monospace';
+    for (let i = 0; i < columns; i++) {
+      const y = drops[i] * fontSize;
+      const x = i * colW;
+      // Lead char: cyan
+      ctx.fillStyle = '#00d4ff';
+      const leadChar = charArr[Math.floor(Math.random() * charArr.length)];
+      ctx.fillText(leadChar, x, y);
+      // Trail chars handled by fade effect
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i] += speeds[i];
+    }
   }
-  requestAnimationFrame(update);
-}
 
-function runHeroCounters() {
-  const stats = [
-    { el: null, target: 6 },
-    { el: null, target: 329, isK: true },
-    { el: null, target: 27 },
-    { el: null, target: 100, isPercent: true }
+  resize();
+  window.addEventListener('resize', resize);
+  setInterval(draw, 50);
+})();
+
+/* ══════════════════════════════════════════════════════════
+   BOOT SEQUENCE
+══════════════════════════════════════════════════════════ */
+(function() {
+  const bootLines = [
+    '> INITIALIZING AMADEUS INFRASTRUCTURE...',
+    '> LOADING KERNEL MODULES.................. OK',
+    '> MOUNTING PROXMOX HYPERVISOR............. OK',
+    '> STARTING K3S CLUSTER................... OK',
+    '> CONNECTING TAILSCALE VPN............... OK',
+    '> ADGUARD DNS FILTER ACTIVE.............. OK',
+    '> ALL SYSTEMS NOMINAL',
+    '> LAUNCHING INTERFACE...'
   ];
-  document.querySelectorAll('.hstat-num').forEach((el, i) => {
-    stats[i].el = el;
+
+  const terminal = document.getElementById('boot-terminal');
+  const cursor = document.getElementById('boot-cursor');
+  const boot = document.getElementById('boot');
+
+  let lineIdx = 0;
+  let charIdx = 0;
+  let currentSpan = null;
+
+  function nextLine() {
+    if (lineIdx >= bootLines.length) {
+      // Done — fade out
+      setTimeout(() => {
+        boot.classList.add('fade-out');
+        setTimeout(() => { boot.style.display = 'none'; }, 900);
+      }, 400);
+      return;
+    }
+    currentSpan = document.createElement('span');
+    currentSpan.className = 'boot-line';
+    terminal.insertBefore(currentSpan, cursor);
+    charIdx = 0;
+    typeChar();
+  }
+
+  function typeChar() {
+    const line = bootLines[lineIdx];
+    if (charIdx < line.length) {
+      currentSpan.textContent += line[charIdx];
+      charIdx++;
+      setTimeout(typeChar, 38 + Math.random() * 20);
+    } else {
+      lineIdx++;
+      setTimeout(nextLine, 180);
+    }
+  }
+
+  setTimeout(nextLine, 300);
+})();
+
+/* ══════════════════════════════════════════════════════════
+   GLITCH DECODER
+══════════════════════════════════════════════════════════ */
+(function() {
+  const glitchChars = '!@#$%^&*<>/\\|?ABCDEFabcdef0123456789ΔΩΨΞαβγδ'.split('');
+  const decoded = new WeakSet();
+
+  function scramble(el) {
+    if (decoded.has(el)) return;
+    decoded.add(el);
+    const real = el.getAttribute('data-text') || el.textContent;
+    const len = real.length;
+    const duration = 800;
+    const start = performance.now();
+
+    function frame(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const revealCount = Math.floor(progress * len);
+      let result = '';
+      for (let i = 0; i < len; i++) {
+        if (i < revealCount) {
+          result += real[i];
+        } else {
+          result += real[i] === ' ' ? ' ' : glitchChars[Math.floor(Math.random() * glitchChars.length)];
+        }
+      }
+      el.textContent = result;
+      if (progress < 1) requestAnimationFrame(frame);
+      else el.textContent = real;
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        scramble(e.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  document.querySelectorAll('.glitch-decode').forEach(el => observer.observe(el));
+})();
+
+/* ══════════════════════════════════════════════════════════
+   CARD SCAN-IN
+══════════════════════════════════════════════════════════ */
+(function() {
+  function animateCards(container, selector, staggerMs) {
+    const cards = container.querySelectorAll(selector);
+    cards.forEach((card, i) => {
+      setTimeout(() => {
+        card.style.animation = `scanIn 0.5s both`;
+        card.style.animationDelay = '0ms';
+        // Force reflow
+        card.offsetHeight;
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, i * (staggerMs || 80));
+    });
+  }
+
+  const configs = [
+    { id: 'arch-grid', selector: '.arch-card', stagger: 80 },
+    { id: 'flow-nodes', selector: '.flow-node', stagger: 100 },
+    { id: 'vm-grid', selector: '.vm-card', stagger: 70 },
+    { id: 'pod-grid', selector: '.pod', stagger: 60 },
+    { id: 'svc-grid', selector: '.svc-card', stagger: 70 },
+    { id: 'conclusion-grid', selector: '.concl-card', stagger: 90 },
+  ];
+
+  const triggered = new Set();
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting && !triggered.has(e.target.id)) {
+        triggered.add(e.target.id);
+        const cfg = configs.find(c => c.id === e.target.id);
+        if (cfg) animateCards(e.target, cfg.selector, cfg.stagger);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  configs.forEach(cfg => {
+    const el = document.getElementById(cfg.id);
+    if (el) observer.observe(el);
   });
-  stats.forEach(s => {
-    if (s.el) animateCounter(s.el, s.target, 1200);
+})();
+
+/* ══════════════════════════════════════════════════════════
+   SCROLL SPY — TAB NAV
+══════════════════════════════════════════════════════════ */
+(function() {
+  const tabs = document.querySelectorAll('.tab-btn');
+  const sections = document.querySelectorAll('section');
+
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.dataset.target);
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
   });
-}
 
-// ── SLIDE ENGINE ──
-const slides = document.querySelectorAll('.slide');
-const dots = document.querySelectorAll('.dot');
-const counter = document.getElementById('counter');
-let current = 0;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        tabs.forEach(t => t.classList.remove('active'));
+        const activeTab = document.querySelector(`.tab-btn[data-target="${e.target.id}"]`);
+        if (activeTab) activeTab.classList.add('active');
+      }
+    });
+  }, { threshold: 0.5 });
 
-function goTo(n) {
-  slides[current].classList.remove('active');
-  dots[current].classList.remove('active');
-  current = (n + slides.length) % slides.length;
-  slides[current].classList.add('active');
-  dots[current].classList.add('active');
-  counter.textContent = String(current + 1).padStart(2,'0') + ' / ' + String(slides.length).padStart(2,'0');
-  // hide swipe hint on first navigation
-  const hint = document.getElementById('swipeHint');
-  if (hint) hint.style.display = 'none';
-  // run hero counters when returning to slide 1
-  if (current === 0) runHeroCounters();
-  // scroll to top on mobile
-  if (isMobile) window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+  sections.forEach(s => observer.observe(s));
+})();
 
-document.getElementById('next').addEventListener('click', () => goTo(current + 1));
-document.getElementById('prev').addEventListener('click', () => goTo(current - 1));
-dots.forEach((d, i) => d.addEventListener('click', () => goTo(i)));
+/* ══════════════════════════════════════════════════════════
+   SCROLL HINT FADE
+══════════════════════════════════════════════════════════ */
+(function() {
+  const hint = document.getElementById('scroll-hint');
+  setTimeout(() => {
+    if (hint) {
+      hint.style.transition = 'opacity 1s';
+      hint.style.opacity = '0';
+      setTimeout(() => hint.remove(), 1000);
+    }
+  }, 5000);
+})();
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(current - 1);
-});
+/* ══════════════════════════════════════════════════════════
+   TERMINAL TYPEWRITER — SYSTEM SECTION
+══════════════════════════════════════════════════════════ */
+(function() {
+  const termBody = document.getElementById('terminal-body');
+  const lines = [
+    { type: 'cmd', text: 'root@amadeus:~# kubectl get nodes' },
+    { type: 'out', text: 'NAME    STATUS   ROLES           AGE   VERSION' },
+    { type: 'out', text: 'kubes   Ready    control-plane   46d   v1.34.3+k3s1' },
+    { type: 'blank', text: '' },
+    { type: 'cmd', text: 'root@amadeus:~# kubectl get pods -A | grep -v Completed' },
+    { type: 'out', text: '28 pods Running across all namespaces' },
+    { type: 'blank', text: '' },
+    { type: 'cmd', text: 'root@amadeus:~# uptime' },
+    { type: 'out', text: '17:20:15 up 34 days,  load average: 0.45, 0.38, 0.41' },
+    { type: 'blank', text: '' },
+    { type: 'prompt', text: 'root@amadeus:~# ' },
+  ];
 
-// Touch swipe
-let tx = 0;
-document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
-document.addEventListener('touchend', e => {
-  const dx = tx - e.changedTouches[0].clientX;
-  if (Math.abs(dx) > 50) goTo(current + (dx > 0 ? 1 : -1));
-});
+  let started = false;
+
+  function buildTerminal() {
+    if (started) return;
+    started = true;
+    let lineIdx = 0;
+
+    const cursor = document.createElement('span');
+    cursor.className = 'term-cursor';
+
+    function addLine(line, cb) {
+      const span = document.createElement('div');
+      if (line.type === 'blank') {
+        span.innerHTML = '&nbsp;';
+        termBody.appendChild(span);
+        setTimeout(cb, 80);
+        return;
+      }
+      if (line.type === 'out') {
+        span.className = 'term-output';
+        span.textContent = line.text;
+        termBody.appendChild(span);
+        setTimeout(cb, 60);
+        return;
+      }
+      // cmd or prompt — type char by char
+      span.className = line.type === 'prompt' ? 'term-prompt' : 'term-cmd';
+      termBody.appendChild(span);
+      termBody.appendChild(cursor);
+      let i = 0;
+      function typeNext() {
+        if (i < line.text.length) {
+          span.textContent += line.text[i++];
+          setTimeout(typeNext, 35 + Math.random() * 25);
+        } else {
+          if (line.type === 'prompt') return; // leave cursor blinking
+          termBody.removeChild(cursor);
+          span.appendChild(document.createElement('br'));
+          setTimeout(cb, 150);
+        }
+      }
+      typeNext();
+    }
+
+    function nextLine() {
+      if (lineIdx >= lines.length) return;
+      addLine(lines[lineIdx++], nextLine);
+    }
+
+    nextLine();
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) buildTerminal();
+    });
+  }, { threshold: 0.3 });
+
+  if (termBody) observer.observe(termBody);
+})();
 </script>
 </body>
 </html>
