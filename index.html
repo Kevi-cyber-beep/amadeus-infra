@@ -724,21 +724,35 @@
 
     /* ── Mobile ── */
     @media (max-width: 768px) {
-      section { padding: 100px 20px 60px; }
-      .arch-grid { grid-template-columns: 1fr; }
+      section { padding: 80px 20px 60px; }
+      .arch-grid { grid-template-columns: 1fr 1fr; }
       .network-layout { grid-template-columns: 1fr; }
       .network-svg-wrap { display: none; }
       .infra-layout { grid-template-columns: 1fr; }
       .svc-grid { grid-template-columns: 1fr 1fr; }
       .security-layout { grid-template-columns: 1fr; }
       .conclusion-grid { grid-template-columns: 1fr 1fr; }
-      .hero-stats { gap: 24px; }
-      .pod-grid { grid-template-columns: 1fr; }
+      .hero-stats { gap: 20px; }
+      .pod-grid { grid-template-columns: 1fr 1fr; }
+      .vm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
       #tab-nav { padding: 0 12px; }
+      .stat-num { font-size: 1.8rem; }
+      .dns-big-num { font-size: 2.5rem; }
+      .terminal-body { font-size: 11px; padding: 16px; }
+      .sec-panel { padding: 20px; }
     }
     @media (max-width: 480px) {
+      section { padding: 70px 14px 50px; }
+      .arch-grid { grid-template-columns: 1fr; }
       .svc-grid { grid-template-columns: 1fr; }
       .conclusion-grid { grid-template-columns: 1fr; }
+      .vm-grid { grid-template-columns: 1fr; }
+      .pod-grid { grid-template-columns: 1fr 1fr; }
+      .stat-num { font-size: 1.6rem; }
+      .dns-big-num { font-size: 2rem; }
+      .tab-btn { padding: 6px 10px; font-size: 9px; }
+      section h2 { margin-bottom: 32px; }
+      .infra-box { padding: 18px; }
     }
     /* ── Typography Fixes ── */
     body { font-size: 15px; line-height: 1.65; }
@@ -922,24 +936,6 @@
               .svg-sub { font-family: 'Space Mono', monospace; font-size: 9px; fill: #5a6a80; }
               @keyframes dash-anim { to { stroke-dashoffset: -40; } }
               .animated-dash { animation: dash-anim 1.5s linear infinite; }
-              /* ── Typography Fixes ── */
-    body { font-size: 15px; line-height: 1.65; }
-    .arch-card h3 { font-size: 1.05rem; margin-bottom: 12px; line-height: 1.3; }
-    .arch-card p { font-size: 14px; line-height: 1.75; color: var(--muted); }
-    .svc-name { font-size: 1.05rem; margin-bottom: 8px; }
-    .svc-desc { font-size: 13px; line-height: 1.65; }
-    .flow-label { font-size: 13px; }
-    .flow-desc { font-size: 13px; line-height: 1.6; margin-top: 4px; }
-    .vm-role { font-size: 13px; margin-bottom: 6px; }
-    .vm-specs { font-size: 12px; margin-bottom: 12px; }
-    .vm-name { font-size: 13px; }
-    .pod-name { font-size: 11px; }
-    .pod-ns { font-size: 11px; margin-top: 4px; }
-    .sec-panel p, .sec-panel li { font-size: 14px; line-height: 1.75; }
-    .concl-card p { font-size: 14px; line-height: 1.7; }
-    .concl-card h3 { font-size: 1.05rem; margin-bottom: 10px; }
-    .hero-sub { font-size: 14px; letter-spacing: 3px; }
-    section h2 { line-height: 1.15; margin-bottom: 48px; }
   </style>
             <filter id="glow">
               <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
@@ -1323,6 +1319,14 @@
         <span class="term-title">root@amadeus — bash</span>
       </div>
       <div class="terminal-body" id="terminal-body">
+        <div class="term-cmd">root@amadeus:~# kubectl get nodes</div>
+        <div class="term-output">NAME    STATUS   ROLES           AGE   VERSION</div>
+        <div class="term-output">kubes   Ready    control-plane   46d   v1.34.3+k3s1</div>
+        <div>&nbsp;</div>
+        <div class="term-cmd">root@amadeus:~# kubectl get pods -A | grep -v Completed</div>
+        <div class="term-output">28 pods Running across all namespaces</div>
+        <div>&nbsp;</div>
+        <div class="term-prompt">root@amadeus:~# <span class="term-cursor"></span></div>
       </div>
     </div>
 
@@ -1615,6 +1619,7 @@
   function buildTerminal() {
     if (started) return;
     started = true;
+    termBody.innerHTML = '';
     let lineIdx = 0;
 
     const cursor = document.createElement('span');
