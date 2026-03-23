@@ -585,14 +585,14 @@ h3 {
 .svc-card:hover { transform: translateY(-6px); border-color: rgba(255,255,255,0.15); }
 .svc-card:hover::after { opacity: 1; }
 
-.svc-s1::after { background: radial-gradient(circle at 50% 0%, rgba(0,212,255,0.06) 0%, transparent 70%); }
-.svc-s2::after { background: radial-gradient(circle at 50% 0%, rgba(0,255,157,0.06) 0%, transparent 70%); }
-.svc-s3::after { background: radial-gradient(circle at 50% 0%, rgba(124,106,255,0.06) 0%, transparent 70%); }
-.svc-s4::after { background: radial-gradient(circle at 50% 0%, rgba(255,140,66,0.06) 0%, transparent 70%); }
-.svc-s5::after { background: radial-gradient(circle at 50% 0%, rgba(255,77,109,0.06) 0%, transparent 70%); }
-.svc-s6::after { background: radial-gradient(circle at 50% 0%, rgba(0,212,255,0.06) 0%, transparent 70%); }
-.svc-s7::after { background: radial-gradient(circle at 50% 0%, rgba(0,255,157,0.06) 0%, transparent 70%); }
-.svc-s8::after { background: radial-gradient(circle at 50% 0%, rgba(124,106,255,0.06) 0%, transparent 70%); }
+.svc-s1::after { background: radial-gradient(circle at 50% 0%, rgba(0,212,255,0.18) 0%, transparent 70%); }
+.svc-s2::after { background: radial-gradient(circle at 50% 0%, rgba(0,255,157,0.18) 0%, transparent 70%); }
+.svc-s3::after { background: radial-gradient(circle at 50% 0%, rgba(124,106,255,0.18) 0%, transparent 70%); }
+.svc-s4::after { background: radial-gradient(circle at 50% 0%, rgba(255,140,66,0.18) 0%, transparent 70%); }
+.svc-s5::after { background: radial-gradient(circle at 50% 0%, rgba(255,77,109,0.18) 0%, transparent 70%); }
+.svc-s6::after { background: radial-gradient(circle at 50% 0%, rgba(0,212,255,0.18) 0%, transparent 70%); }
+.svc-s7::after { background: radial-gradient(circle at 50% 0%, rgba(0,255,157,0.18) 0%, transparent 70%); }
+.svc-s8::after { background: radial-gradient(circle at 50% 0%, rgba(124,106,255,0.18) 0%, transparent 70%); }
 
 .svc-top {
   display: flex;
@@ -793,6 +793,56 @@ h3 {
 .flow-sub { fill: #5a6a80; font-family: 'Space Mono', monospace; font-size: 9px; }
 .flow-label { fill: #00d4ff; font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 1px; }
 
+/* ── PAGE LOADER ── */
+#loader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+#loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.loader-inner {
+  text-align: center;
+}
+
+.loader-logo {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 4px;
+  color: var(--cyan);
+  margin-bottom: 20px;
+  opacity: 0;
+  animation: loaderFadeIn 0.4s ease 0.1s forwards;
+}
+
+.loader-bar-wrap {
+  width: 160px;
+  height: 2px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.loader-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), var(--purple));
+  border-radius: 2px;
+  animation: loaderBar 0.7s cubic-bezier(.4,0,.2,1) 0.2s both;
+}
+
+@keyframes loaderFadeIn { to { opacity: 1; } }
+@keyframes loaderBar { from { width: 0; } to { width: 100%; } }
+
 /* ── SCAN LINE ── */
 .scan-line {
   position: fixed;
@@ -983,6 +1033,42 @@ body.is-mobile #s5 {
   -webkit-overflow-scrolling: touch;
 }
 
+/* ── SWIPE HINT ── */
+.swipe-hint {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  z-index: 100;
+  animation: hintFade 4s ease 2s forwards;
+  opacity: 0;
+  white-space: nowrap;
+}
+
+.swipe-arrow {
+  display: inline-block;
+  animation: hintBounce 1s ease-in-out infinite;
+}
+
+@keyframes hintFade {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  75% { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+@keyframes hintBounce {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(6px); }
+}
+
 /* Small phones */
 body.is-mobile.small-phone .services-grid { grid-template-columns: 1fr; }
 body.is-mobile.small-phone .conclusion-grid { grid-template-columns: 1fr; }
@@ -992,6 +1078,13 @@ body.is-mobile.small-phone h1 { font-size: 32px; }
 </style>
 </head>
 <body>
+
+<div id="loader">
+  <div class="loader-inner">
+    <div class="loader-logo">▲ AMΔDEUS INFRA</div>
+    <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+  </div>
+</div>
 
 <div class="grid-bg"></div>
 <div class="noise-overlay"></div>
@@ -1006,6 +1099,12 @@ body.is-mobile.small-phone h1 { font-size: 32px; }
 </div>
 
 <div class="counter" id="counter">01 / 07</div>
+
+<div class="swipe-hint" id="swipeHint">
+  <span>NAVIGATE</span>
+  <span class="swipe-arrow">→</span>
+  <span>ARROW KEYS / SWIPE</span>
+</div>
 
 <!-- NAVIGATION -->
 <div class="nav">
@@ -1591,6 +1690,14 @@ body.is-mobile.small-phone h1 { font-size: 32px; }
 </div><!-- end deck -->
 
 <script>
+// ── LOADER ──
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('loader').classList.add('hidden');
+    runHeroCounters();
+  }, 900);
+});
+
 // ── DEVICE DETECTION ──
 // Detekton iPhone, iPad, Android — jo vetëm screen size
 const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
@@ -1601,6 +1708,38 @@ if (isMobile) {
   if (window.screen.width <= 400) {
     document.body.classList.add('small-phone');
   }
+}
+
+// ── NUMBER COUNTER ANIMATION ──
+function animateCounter(el, target, duration) {
+  const isPercent = el.textContent.includes('%');
+  const isK = el.textContent.includes('K');
+  const start = 0;
+  const startTime = performance.now();
+  function update(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = Math.round(start + (target - start) * eased);
+    el.textContent = isK ? current + 'K' : isPercent ? current + '%' : current;
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+function runHeroCounters() {
+  const stats = [
+    { el: null, target: 6 },
+    { el: null, target: 329, isK: true },
+    { el: null, target: 27 },
+    { el: null, target: 100, isPercent: true }
+  ];
+  document.querySelectorAll('.hstat-num').forEach((el, i) => {
+    stats[i].el = el;
+  });
+  stats.forEach(s => {
+    if (s.el) animateCounter(s.el, s.target, 1200);
+  });
 }
 
 // ── SLIDE ENGINE ──
@@ -1616,6 +1755,11 @@ function goTo(n) {
   slides[current].classList.add('active');
   dots[current].classList.add('active');
   counter.textContent = String(current + 1).padStart(2,'0') + ' / ' + String(slides.length).padStart(2,'0');
+  // hide swipe hint on first navigation
+  const hint = document.getElementById('swipeHint');
+  if (hint) hint.style.display = 'none';
+  // run hero counters when returning to slide 1
+  if (current === 0) runHeroCounters();
   // scroll to top on mobile
   if (isMobile) window.scrollTo({ top: 0, behavior: 'smooth' });
 }
