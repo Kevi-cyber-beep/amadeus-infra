@@ -722,39 +722,43 @@
       color: var(--muted);
     }
 
-    /* ── Touch/Click Ripple ── */
-    .ripple-dot {
+    /* ── Matrix Touch Streams ── */
+    .matrix-stream {
       position: fixed;
       pointer-events: none;
-      border-radius: 50%;
       z-index: 9998;
-      animation: rippleExpand 0.6s ease-out forwards;
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
+      color: var(--green);
+      white-space: nowrap;
+      writing-mode: vertical-lr;
+      text-orientation: upright;
+      line-height: 1;
+      letter-spacing: 2px;
+      animation: matrixFall var(--dur) linear forwards;
+      text-shadow: 0 0 8px rgba(0,255,157,0.6);
     }
-    @keyframes rippleExpand {
-      0% {
-        width: 0; height: 0;
-        opacity: 0.6;
-        box-shadow: 0 0 8px rgba(0,212,255,0.4);
-      }
-      100% {
-        width: 40px; height: 40px;
-        opacity: 0;
-        box-shadow: 0 0 0 rgba(0,212,255,0);
-      }
+    .matrix-stream .lead {
+      color: #fff;
+      text-shadow: 0 0 10px rgba(255,255,255,0.8);
     }
-    .ripple-particle {
+    @keyframes matrixFall {
+      0% { transform: translateY(0); opacity: 1; }
+      85% { opacity: 0.6; }
+      100% { transform: translateY(var(--fall)); opacity: 0; }
+    }
+
+    /* ── Boot Burst Canvas ── */
+    #boot-burst {
       position: fixed;
-      width: 3px; height: 3px;
-      border-radius: 50%;
-      background: var(--cyan);
+      inset: 0;
+      z-index: 9999;
       pointer-events: none;
-      z-index: 9998;
-      animation: particleFly 0.7s ease-out forwards;
+      opacity: 0;
+      transition: opacity 0.3s;
     }
-    @keyframes particleFly {
-      0% { opacity: 1; transform: translate(0,0) scale(1); }
-      100% { opacity: 0; transform: translate(var(--px), var(--py)) scale(0); }
-    }
+    #boot-burst.active { opacity: 1; }
+    #boot-burst.fade-out { opacity: 0; transition: opacity 0.8s; }
 
     /* ── Tap feedback on interactive cards ── */
     .arch-card:active, .svc-card:active, .concl-card:active, .vm-card:active, .pod:active, .flow-node:active {
@@ -866,6 +870,9 @@
      onmouseout="this.style.color='#5a6a80';this.style.borderColor='rgba(255,255,255,0.1)'"
   >SKIP ▸</button>
 </div>
+
+<!-- Boot Burst Overlay -->
+<canvas id="boot-burst"></canvas>
 
 <!-- Matrix Canvas -->
 <canvas id="matrix-canvas"></canvas>
@@ -1546,26 +1553,114 @@
 })();
 
 /* ══════════════════════════════════════════════════════════
-   BOOT SEQUENCE (skip on return visit + skip button)
+   BOOT SEQUENCE + MATRIX BURST TRANSITION
 ══════════════════════════════════════════════════════════ */
 (function() {
   const boot = document.getElementById('boot');
   const skipBtn = document.getElementById('boot-skip');
+  const burstCanvas = document.getElementById('boot-burst');
+  const burstCtx = burstCanvas.getContext('2d');
+  const matrixChars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホ0123456789AMADEUS';
+  const charArr = matrixChars.split('');
+
+  function matrixBurst(callback) {
+    burstCanvas.width = window.innerWidth;
+    burstCanvas.height = window.innerHeight;
+    burstCanvas.classList.add('active');
+
+    const cols = Math.floor(burstCanvas.width / 14);
+    const streams = [];
+    for (let i = 0; i < cols; i++) {
+      streams.push({
+        x: i * 14,
+        y: Math.random() * -burstCanvas.height,
+        speed: 8 + Math.random() * 16,
+        len: 8 + Math.floor(Math.random() * 20),
+        chars: []
+      });
+    }
+
+    // Pre-fill chars
+    streams.forEach(s => {
+      for (let j = 0; j < s.len; j++) {
+        s.chars.push(charArr[Math.floor(Math.random() * charArr.length)]);
+      }
+    });
+
+    let frame = 0;
+    const maxFrames = 60; // ~1 second at 60fps
+
+    function animate() {
+      frame++;
+      burstCtx.fillStyle = 'rgba(0,0,0,0.15)';
+      burstCtx.fillRect(0, 0, burstCanvas.width, burstCanvas.height);
+
+      streams.forEach(s => {
+        for (let j = 0; j < s.len; j++) {
+          const cy = s.y - j * 16;
+          if (cy < -20 || cy > burstCanvas.height + 20) continue;
+
+          // Randomize chars occasionally
+          if (Math.random() > 0.85) {
+            s.chars[j] = charArr[Math.floor(Math.random() * charArr.length)];
+          }
+
+          if (j === 0) {
+            // Lead character — bright white
+            burstCtx.fillStyle = '#fff';
+            burstCtx.font = '15px Space Mono, monospace';
+            burstCtx.shadowColor = '#fff';
+            burstCtx.shadowBlur = 12;
+          } else if (j < 3) {
+            burstCtx.fillStyle = '#00ff9d';
+            burstCtx.font = '14px Space Mono, monospace';
+            burstCtx.shadowColor = '#00ff9d';
+            burstCtx.shadowBlur = 6;
+          } else {
+            const fade = 1 - (j / s.len);
+            burstCtx.fillStyle = `rgba(0,255,157,${fade * 0.7})`;
+            burstCtx.font = '14px Space Mono, monospace';
+            burstCtx.shadowBlur = 0;
+          }
+
+          burstCtx.fillText(s.chars[j], s.x, cy);
+          burstCtx.shadowBlur = 0;
+        }
+
+        s.y += s.speed;
+      });
+
+      if (frame < maxFrames) {
+        requestAnimationFrame(animate);
+      } else {
+        // Fade out burst
+        burstCanvas.classList.add('fade-out');
+        setTimeout(() => {
+          burstCanvas.style.display = 'none';
+          if (callback) callback();
+        }, 800);
+      }
+    }
+
+    // Hide boot terminal immediately, start burst
+    boot.style.display = 'none';
+    requestAnimationFrame(animate);
+  }
 
   function dismissBoot() {
-    boot.classList.add('fade-out');
-    setTimeout(() => { boot.style.display = 'none'; }, 900);
     try { localStorage.setItem('amadeus-boot-seen', '1'); } catch(e) {}
+    matrixBurst();
   }
 
   // Skip immediately if returning visitor
   if (localStorage.getItem('amadeus-boot-seen')) {
     boot.style.display = 'none';
+    burstCanvas.style.display = 'none';
     return;
   }
 
   // Skip button
-  skipBtn.addEventListener('click', dismissBoot);
+  skipBtn.addEventListener('click', () => { dismissed = true; dismissBoot(); });
 
   const bootLines = [
     '> INITIALIZING AMADEUS INFRASTRUCTURE...',
@@ -1589,7 +1684,7 @@
   function nextLine() {
     if (dismissed) return;
     if (lineIdx >= bootLines.length) {
-      setTimeout(dismissBoot, 400);
+      setTimeout(dismissBoot, 300);
       return;
     }
     currentSpan = document.createElement('span');
@@ -1611,9 +1706,6 @@
       setTimeout(nextLine, 180);
     }
   }
-
-  // Override skip to also stop typing
-  skipBtn.addEventListener('click', () => { dismissed = true; });
 
   setTimeout(nextLine, 300);
 })();
@@ -1832,55 +1924,60 @@
 })();
 
 /* ══════════════════════════════════════════════════════════
-   TOUCH / CLICK RIPPLE + PARTICLES
+   MATRIX TOUCH — Characters rain from touch/click point
 ══════════════════════════════════════════════════════════ */
 (function() {
-  const colors = ['#00d4ff', '#00ff9d', '#7c6aff'];
-  let lastRipple = 0;
+  const matrixChars = 'アイウエオカキクケコサシスセソタチツテト0123456789ΔΩΨ';
+  const charArr = matrixChars.split('');
+  let lastSpawn = 0;
 
-  function spawn(x, y) {
+  function spawnStreams(x, y) {
     const now = Date.now();
-    if (now - lastRipple < 50) return; // throttle
-    lastRipple = now;
+    if (now - lastSpawn < 80) return;
+    lastSpawn = now;
 
-    // Ripple ring
-    const ring = document.createElement('div');
-    ring.className = 'ripple-dot';
-    ring.style.left = (x - 20) + 'px';
-    ring.style.top = (y - 20) + 'px';
-    ring.style.border = '1px solid ' + colors[0];
-    document.body.appendChild(ring);
-    ring.addEventListener('animationend', () => ring.remove());
-
-    // Particles
-    const count = 6;
+    // Spawn 3-5 short matrix streams around the touch point
+    const count = 3 + Math.floor(Math.random() * 3);
     for (let i = 0; i < count; i++) {
-      const p = document.createElement('div');
-      p.className = 'ripple-particle';
-      p.style.left = x + 'px';
-      p.style.top = y + 'px';
-      p.style.background = colors[Math.floor(Math.random() * colors.length)];
-      const angle = (Math.PI * 2 / count) * i + (Math.random() - 0.5) * 0.5;
-      const dist = 20 + Math.random() * 30;
-      p.style.setProperty('--px', Math.cos(angle) * dist + 'px');
-      p.style.setProperty('--py', Math.sin(angle) * dist + 'px');
-      document.body.appendChild(p);
-      p.addEventListener('animationend', () => p.remove());
+      const stream = document.createElement('div');
+      stream.className = 'matrix-stream';
+
+      // Build a short string of random chars
+      const len = 4 + Math.floor(Math.random() * 8);
+      let html = '<span class="lead">' + charArr[Math.floor(Math.random() * charArr.length)] + '</span>';
+      for (let j = 1; j < len; j++) {
+        const fade = 1 - (j / len);
+        html += '<span style="opacity:' + (fade * 0.8).toFixed(2) + '">' + charArr[Math.floor(Math.random() * charArr.length)] + '</span>';
+      }
+      stream.innerHTML = html;
+
+      // Position: spread around touch point
+      const offsetX = (Math.random() - 0.5) * 60;
+      stream.style.left = (x + offsetX) + 'px';
+      stream.style.top = y + 'px';
+
+      // Fall distance and duration
+      const fallDist = 80 + Math.random() * 150;
+      const dur = 0.5 + Math.random() * 0.6;
+      stream.style.setProperty('--fall', fallDist + 'px');
+      stream.style.setProperty('--dur', dur + 's');
+
+      document.body.appendChild(stream);
+      stream.addEventListener('animationend', () => stream.remove());
     }
   }
 
-  // Mouse click
+  // Mouse
   document.addEventListener('click', (e) => {
-    // Don't ripple on nav buttons or boot screen
     if (e.target.closest('#tab-nav') || e.target.closest('#boot')) return;
-    spawn(e.clientX, e.clientY);
+    spawnStreams(e.clientX, e.clientY);
   });
 
   // Touch
   document.addEventListener('touchstart', (e) => {
     if (e.target.closest('#tab-nav') || e.target.closest('#boot')) return;
     const t = e.touches[0];
-    spawn(t.clientX, t.clientY);
+    spawnStreams(t.clientX, t.clientY);
   }, { passive: true });
 })();
 </script>
