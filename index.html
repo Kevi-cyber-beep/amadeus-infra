@@ -1648,15 +1648,7 @@
   }
 
   function dismissBoot() {
-    try { localStorage.setItem('amadeus-boot-seen', '1'); } catch(e) {}
     matrixBurst();
-  }
-
-  // Skip immediately if returning visitor
-  if (localStorage.getItem('amadeus-boot-seen')) {
-    boot.style.display = 'none';
-    burstCanvas.style.display = 'none';
-    return;
   }
 
   // Skip button
