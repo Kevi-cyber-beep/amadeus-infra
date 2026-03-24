@@ -168,7 +168,7 @@
     .tab-btn.active {
       color: var(--cyan);
       border-bottom-color: var(--cyan);
-      text-shadow: 0 0 8px rgba(0,212,255,0.5);
+      text-shadow: 0 0 6px rgba(0,212,255,0.3);
     }
 
     /* ── Sections ── */
@@ -337,8 +337,8 @@
       transition: border-color 0.3s, box-shadow 0.3s;
     }
     .arch-card:hover {
-      border-color: rgba(0,212,255,0.2);
-      box-shadow: 0 0 20px rgba(0,212,255,0.05);
+      border-color: rgba(0,212,255,0.15);
+      box-shadow: 0 0 12px rgba(0,212,255,0.03);
     }
     .arch-card .card-icon {
       font-size: 28px;
@@ -480,7 +480,7 @@
       border-radius: 50%;
       background: var(--green);
       margin-right: 4px;
-      box-shadow: 0 0 4px var(--green);
+      box-shadow: 0 0 3px rgba(0,255,157,0.35);
       animation: pulseDot 2s ease-in-out infinite;
     }
     @keyframes pulseDot {
@@ -506,8 +506,8 @@
       position: relative;
     }
     .svc-card:hover {
-      border-color: rgba(0,212,255,0.2);
-      box-shadow: 0 0 20px rgba(0,212,255,0.05);
+      border-color: rgba(0,212,255,0.15);
+      box-shadow: 0 0 12px rgba(0,212,255,0.03);
     }
     .svc-icon { font-size: 24px; margin-bottom: 12px; }
     .svc-name {
@@ -542,7 +542,7 @@
       width: 6px; height: 6px;
       border-radius: 50%;
       background: var(--green);
-      box-shadow: 0 0 6px var(--green);
+      box-shadow: 0 0 4px rgba(0,255,157,0.4);
       animation: pulseDot 2s ease-in-out infinite;
     }
 
@@ -579,7 +579,7 @@
       width: 8px; height: 8px;
       border-radius: 50%;
       background: var(--green);
-      box-shadow: 0 0 6px var(--green);
+      box-shadow: 0 0 3px rgba(0,255,157,0.35);
       flex-shrink: 0;
       margin-top: 5px;
     }
@@ -645,7 +645,7 @@
       padding: 0;
       margin-bottom: 48px;
       overflow: hidden;
-      box-shadow: 0 0 30px rgba(0,255,157,0.05);
+      box-shadow: 0 0 15px rgba(0,255,157,0.03);
     }
     .terminal-titlebar {
       background: #0a0f0a;
@@ -699,7 +699,7 @@
       transform: translateY(30px);
       transition: border-color 0.3s;
     }
-    .concl-card:hover { border-color: rgba(0,212,255,0.2); }
+    .concl-card:hover { border-color: rgba(0,212,255,0.12); }
     .concl-icon { font-size: 28px; margin-bottom: 14px; }
     .concl-card h3 {
       font-family: 'Syne', sans-serif;
@@ -781,6 +781,24 @@
   <div id="boot-terminal">
     <span id="boot-cursor"></span>
   </div>
+  <button id="boot-skip" style="
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    background: none;
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 6px 16px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    z-index: 10000;
+  " onmouseover="this.style.color='#00d4ff';this.style.borderColor='rgba(0,212,255,0.3)'"
+     onmouseout="this.style.color='#5a6a80';this.style.borderColor='rgba(255,255,255,0.1)'"
+  >SKIP ▸</button>
 </div>
 
 <!-- Matrix Canvas -->
@@ -936,9 +954,21 @@
               .svg-sub { font-family: 'Space Mono', monospace; font-size: 9px; fill: #5a6a80; }
               @keyframes dash-anim { to { stroke-dashoffset: -40; } }
               .animated-dash { animation: dash-anim 1.5s linear infinite; }
+              @keyframes flowPulse {
+                0% { opacity: 0; offset-distance: 0%; }
+                10% { opacity: 1; }
+                90% { opacity: 1; }
+                100% { opacity: 0; offset-distance: 100%; }
+              }
+              .flow-particle {
+                r: 3;
+                fill: #00d4ff;
+                filter: url(#glow);
+                opacity: 0;
+              }
   </style>
             <filter id="glow">
-              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
               <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
           </defs>
@@ -948,10 +978,24 @@
           <text x="200" y="43" text-anchor="middle" class="svg-title">Surface Laptop</text>
           <text x="200" y="58" text-anchor="middle" class="svg-sub">Ubuntu 24.04</text>
 
+          <!-- Connection paths (invisible, used for particle motion) -->
+          <path id="path1" d="M200,72 L200,112" fill="none" stroke="none"/>
+          <path id="path2" d="M200,168 L200,204" fill="none" stroke="none"/>
+          <path id="path3" d="M200,264 L200,300" fill="none" stroke="none"/>
+          <path id="path4a" d="M160,360 L100,400" fill="none" stroke="none"/>
+          <path id="path4b" d="M200,360 L200,400" fill="none" stroke="none"/>
+          <path id="path4c" d="M240,360 L300,400" fill="none" stroke="none"/>
+
           <!-- Arrow -->
           <line x1="200" y1="72" x2="200" y2="108" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="8,4" class="animated-dash"/>
           <polygon points="200,112 195,104 205,104" fill="#00d4ff"/>
           <text x="215" y="95" class="svg-label">WARP / Tailscale</text>
+
+          <!-- Flowing particle: Client → VPN -->
+          <circle r="3" fill="#00d4ff" filter="url(#glow)" opacity="0">
+            <animateMotion dur="2s" repeatCount="indefinite" path="M200,72 L200,112" begin="0s"/>
+            <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.8;1" dur="2s" repeatCount="indefinite" begin="0s"/>
+          </circle>
 
           <!-- Node: VPN -->
           <rect x="130" y="116" width="140" height="52" rx="4" fill="#080d14" stroke="rgba(124,106,255,0.4)" stroke-width="1" filter="url(#glow)"/>
@@ -963,6 +1007,12 @@
           <polygon points="200,208 195,200 205,200" fill="#00d4ff"/>
           <text x="215" y="191" class="svg-label">DNS query</text>
 
+          <!-- Flowing particle: VPN → AdGuard -->
+          <circle r="3" fill="#00ff9d" filter="url(#glow)" opacity="0">
+            <animateMotion dur="2s" repeatCount="indefinite" path="M200,168 L200,204" begin="0.6s"/>
+            <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.8;1" dur="2s" repeatCount="indefinite" begin="0.6s"/>
+          </circle>
+
           <!-- Node: AdGuard -->
           <rect x="130" y="212" width="140" height="52" rx="4" fill="#080d14" stroke="rgba(0,255,157,0.3)" stroke-width="1"/>
           <text x="200" y="235" text-anchor="middle" class="svg-title" fill="#00ff9d">AdGuard Home</text>
@@ -973,6 +1023,12 @@
           <polygon points="200,304 195,296 205,296" fill="#00d4ff"/>
           <text x="215" y="287" class="svg-label">HTTP/S request</text>
 
+          <!-- Flowing particle: AdGuard → K3s -->
+          <circle r="3" fill="#00d4ff" filter="url(#glow)" opacity="0">
+            <animateMotion dur="2s" repeatCount="indefinite" path="M200,264 L200,300" begin="1.2s"/>
+            <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.8;1" dur="2s" repeatCount="indefinite" begin="1.2s"/>
+          </circle>
+
           <!-- Node: K3s -->
           <rect x="110" y="308" width="180" height="52" rx="4" fill="#080d14" stroke="rgba(0,212,255,0.5)" stroke-width="1.5" filter="url(#glow)"/>
           <text x="200" y="331" text-anchor="middle" class="svg-title">K3s Cluster</text>
@@ -982,6 +1038,20 @@
           <line x1="160" y1="360" x2="100" y2="400" stroke="#00d4ff" stroke-width="1" stroke-dasharray="6,3" class="animated-dash"/>
           <line x1="200" y1="360" x2="200" y2="400" stroke="#00d4ff" stroke-width="1" stroke-dasharray="6,3" class="animated-dash"/>
           <line x1="240" y1="360" x2="300" y2="400" stroke="#00d4ff" stroke-width="1" stroke-dasharray="6,3" class="animated-dash"/>
+
+          <!-- Flowing particles: K3s → Services -->
+          <circle r="2.5" fill="#00d4ff" filter="url(#glow)" opacity="0">
+            <animateMotion dur="1.5s" repeatCount="indefinite" path="M160,360 L100,400" begin="1.8s"/>
+            <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.8;1" dur="1.5s" repeatCount="indefinite" begin="1.8s"/>
+          </circle>
+          <circle r="2.5" fill="#00d4ff" filter="url(#glow)" opacity="0">
+            <animateMotion dur="1.5s" repeatCount="indefinite" path="M200,360 L200,400" begin="2.1s"/>
+            <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.8;1" dur="1.5s" repeatCount="indefinite" begin="2.1s"/>
+          </circle>
+          <circle r="2.5" fill="#00d4ff" filter="url(#glow)" opacity="0">
+            <animateMotion dur="1.5s" repeatCount="indefinite" path="M240,360 L300,400" begin="2.4s"/>
+            <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.8;1" dur="1.5s" repeatCount="indefinite" begin="2.4s"/>
+          </circle>
 
           <!-- Service nodes -->
           <rect x="44" y="400" width="112" height="44" rx="3" fill="#080d14" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
@@ -1410,9 +1480,27 @@
 })();
 
 /* ══════════════════════════════════════════════════════════
-   BOOT SEQUENCE
+   BOOT SEQUENCE (skip on return visit + skip button)
 ══════════════════════════════════════════════════════════ */
 (function() {
+  const boot = document.getElementById('boot');
+  const skipBtn = document.getElementById('boot-skip');
+
+  function dismissBoot() {
+    boot.classList.add('fade-out');
+    setTimeout(() => { boot.style.display = 'none'; }, 900);
+    try { localStorage.setItem('amadeus-boot-seen', '1'); } catch(e) {}
+  }
+
+  // Skip immediately if returning visitor
+  if (localStorage.getItem('amadeus-boot-seen')) {
+    boot.style.display = 'none';
+    return;
+  }
+
+  // Skip button
+  skipBtn.addEventListener('click', dismissBoot);
+
   const bootLines = [
     '> INITIALIZING AMADEUS INFRASTRUCTURE...',
     '> LOADING KERNEL MODULES.................. OK',
@@ -1426,19 +1514,16 @@
 
   const terminal = document.getElementById('boot-terminal');
   const cursor = document.getElementById('boot-cursor');
-  const boot = document.getElementById('boot');
 
   let lineIdx = 0;
   let charIdx = 0;
   let currentSpan = null;
+  let dismissed = false;
 
   function nextLine() {
+    if (dismissed) return;
     if (lineIdx >= bootLines.length) {
-      // Done — fade out
-      setTimeout(() => {
-        boot.classList.add('fade-out');
-        setTimeout(() => { boot.style.display = 'none'; }, 900);
-      }, 400);
+      setTimeout(dismissBoot, 400);
       return;
     }
     currentSpan = document.createElement('span');
@@ -1449,6 +1534,7 @@
   }
 
   function typeChar() {
+    if (dismissed) return;
     const line = bootLines[lineIdx];
     if (charIdx < line.length) {
       currentSpan.textContent += line[charIdx];
@@ -1459,6 +1545,9 @@
       setTimeout(nextLine, 180);
     }
   }
+
+  // Override skip to also stop typing
+  skipBtn.addEventListener('click', () => { dismissed = true; });
 
   setTimeout(nextLine, 300);
 })();
