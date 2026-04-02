@@ -915,7 +915,7 @@
       <div class="stat-label">Threats Blocked</div>
     </div>
     <div class="stat-item">
-      <span class="stat-num">27</span>
+      <span class="stat-num">24</span>
       <div class="stat-label">News Feeds</div>
     </div>
     <div class="stat-item">
@@ -935,9 +935,9 @@
       <div class="arch-card">
         <div class="card-icon">🔐</div>
         <h3>Encrypted Connection</h3>
-        <p>WARP tunnel combined with Tailscale subnet router provides end-to-end encrypted remote access to the entire 192.168.100.0/24 network.</p>
+        <p>Tailscale subnet router provides end-to-end encrypted remote access to the entire 192.168.100.0/24 network.</p>
         <div class="card-tags">
-          <span class="tag">WARP</span>
+          <span class="tag">TAILSCALE</span>
           <span class="tag">TAILSCALE</span>
           <span class="tag">UFW</span>
         </div>
@@ -991,7 +991,7 @@
         <div class="flow-node">
           <div class="flow-icon">🔒</div>
           <div>
-            <div class="flow-label">WARP / Tailscale</div>
+            <div class="flow-label">Tailscale VPN</div>
             <div class="flow-desc">Encrypted Tunnel · Zero-trust access</div>
           </div>
         </div>
@@ -1062,7 +1062,7 @@
           <!-- Arrow -->
           <line x1="200" y1="72" x2="200" y2="108" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="8,4" class="animated-dash"/>
           <polygon points="200,112 195,104 205,104" fill="#00d4ff"/>
-          <text x="215" y="95" class="svg-label">WARP / Tailscale</text>
+          <text x="215" y="95" class="svg-label">Tailscale VPN</text>
 
           <!-- Flowing particle: Client → VPN -->
           <circle r="3" fill="#00d4ff" filter="url(#glow)" opacity="0">
@@ -1162,7 +1162,7 @@
               <span class="badge badge-running">RUNNING</span>
             </div>
             <div class="vm-role">K3s Server · VM 100</div>
-            <div class="vm-specs">4 vCPU · 8 GB · Ubuntu 22.04</div>
+            <div class="vm-specs">4 vCPU · 6 GB · Rocky Linux 10.1</div>
             <div class="vm-bar-wrap"><div class="vm-bar" style="width:65%"></div></div>
           </div>
 
@@ -1172,7 +1172,7 @@
               <span class="badge badge-running">RUNNING</span>
             </div>
             <div class="vm-role">Tailscale Gateway · LXC 101</div>
-            <div class="vm-specs">2 vCPU · 1 GB · Debian 12</div>
+            <div class="vm-specs">1 vCPU · 512 MB · Ubuntu Noble</div>
             <div class="vm-bar-wrap"><div class="vm-bar" style="width:20%"></div></div>
           </div>
 
@@ -1182,7 +1182,7 @@
               <span class="badge badge-running">RUNNING</span>
             </div>
             <div class="vm-role">AdGuard Home · LXC 102</div>
-            <div class="vm-specs">2 vCPU · 512 MB · Alpine</div>
+            <div class="vm-specs">1 vCPU · 512 MB · Ubuntu Noble</div>
             <div class="vm-bar-wrap"><div class="vm-bar" style="width:15%"></div></div>
           </div>
 
@@ -1192,27 +1192,27 @@
               <span class="badge badge-running">RUNNING</span>
             </div>
             <div class="vm-role">Prometheus Node · VM 103</div>
-            <div class="vm-specs">2 vCPU · 2 GB · Ubuntu 22.04</div>
+            <div class="vm-specs">2 vCPU · 2 GB · Rocky Linux 10.1</div>
             <div class="vm-bar-wrap"><div class="vm-bar" style="width:40%"></div></div>
           </div>
 
           <div class="vm-card">
             <div class="vm-header">
-              <span class="vm-name">win2k25</span>
-              <span class="badge badge-running">RUNNING</span>
+              <span class="vm-name">windows11-wasabi</span>
+              <span class="badge badge-stopped">STOPPED</span>
             </div>
-            <div class="vm-role">Windows Server 2025 · VM</div>
-            <div class="vm-specs">5 vCPU · 6 GB · Windows Server</div>
+            <div class="vm-role">Windows 11 · VM 105</div>
+            <div class="vm-specs">4 vCPU · 2 GB · Windows 11</div>
             <div class="vm-bar-wrap"><div class="vm-bar" style="width:55%"></div></div>
           </div>
 
           <div class="vm-card">
             <div class="vm-header">
-              <span class="vm-name">tails</span>
-              <span class="badge badge-stopped">STOPPED</span>
+              <span class="vm-name">metadata</span>
+              <span class="badge badge-running">RUNNING</span>
             </div>
-            <div class="vm-role">Tails OS · VM</div>
-            <div class="vm-specs">4 vCPU · 4 GB · Tails Linux</div>
+            <div class="vm-role">Metadata Inspector · LXC 104</div>
+            <div class="vm-specs">1 vCPU · 512 MB · Debian Trixie</div>
             <div class="vm-bar-wrap"><div class="vm-bar" style="width:30%; background: var(--muted)"></div></div>
           </div>
 
@@ -1280,7 +1280,7 @@
       <div class="svc-card">
         <div class="svc-icon">📰</div>
         <div class="svc-name">Miniflux</div>
-        <div class="svc-desc">Self-hosted RSS reader. 27 active feeds, minimal and fast.</div>
+        <div class="svc-desc">Self-hosted RSS reader. 24 active feeds, minimal and fast.</div>
         <div class="svc-meta">
           <span class="svc-port">:30900 · prod</span>
           <span class="live-dot">LIVE</span>
