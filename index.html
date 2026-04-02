@@ -893,6 +893,7 @@
   <button class="tab-btn" data-target="services">SERVICES</button>
   <button class="tab-btn" data-target="security">SECURITY</button>
   <button class="tab-btn" data-target="system">SYSTEM</button>
+  <button class="tab-btn" data-target="genesys">GENESYS</button>
 </nav>
 
 <!-- ══════════════════════════════════════ HERO ══════════════════════════════════════ -->
@@ -1198,7 +1199,7 @@
 
           <div class="vm-card">
             <div class="vm-header">
-              <span class="vm-name">windows11-wasabi</span>
+              <span class="vm-name">windows</span>
               <span class="badge badge-stopped">STOPPED</span>
             </div>
             <div class="vm-role">Windows 11 · VM 105</div>
@@ -1357,6 +1358,27 @@
         </div>
       </div>
 
+
+      <div class="svc-card">
+        <div class="svc-icon">🏠</div>
+        <div class="svc-name">Homepage</div>
+        <div class="svc-desc">Unified dashboard. All services, metrics and status in one place.</div>
+        <div class="svc-meta">
+          <span class="svc-port">:443 · tools</span>
+          <span class="live-dot">LIVE</span>
+        </div>
+      </div>
+
+      <div class="svc-card">
+        <div class="svc-icon">📋</div>
+        <div class="svc-name">Loki</div>
+        <div class="svc-desc">Centralized log aggregation. All K8s pod logs shipped via Promtail DaemonSet.</div>
+        <div class="svc-meta">
+          <span class="svc-port">:3100 · VM 103</span>
+          <span class="live-dot">LIVE</span>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -1497,6 +1519,87 @@
     </div>
   </div>
 </section>
+
+<!-- ════════════════════════════ GENESYS ════════════════════════════ -->
+<section id="genesys">
+  <div class="section-inner">
+    <div class="eyebrow">07 — GENESYS</div>
+    <h2 class="glitch-decode" data-text="Destroy Today. Rebuild Tomorrow.">Destroy Today. Rebuild Tomorrow.</h2>
+
+    <div class="genesys-layout">
+
+      <div class="genesys-philosophy">
+        <div class="arch-card c-cyan">
+          <div class="arch-num">01 · REPRODUCIBLE</div>
+          <div class="arch-icon">🔁</div>
+          <h3>Every step is deterministic</h3>
+          <p>No guesswork. Each phase produces the same result regardless of when or where it runs.</p>
+        </div>
+        <div class="arch-card c-green">
+          <div class="arch-num">02 · ORDERED</div>
+          <div class="arch-icon">📐</div>
+          <h3>Dependencies are explicit</h3>
+          <p>AdGuard first. Tailscale second. K3s never before DNS is healthy.</p>
+        </div>
+        <div class="arch-card c-purple">
+          <div class="arch-num">03 · MINIMAL</div>
+          <div class="arch-icon">⚡</div>
+          <h3>No unnecessary steps</h3>
+          <p>Each action has a purpose. No ceremony, no redundancy, no cargo-cult configuration.</p>
+        </div>
+        <div class="arch-card c-orange">
+          <div class="arch-num">04 · PRESSURE-READY</div>
+          <div class="arch-icon">🧠</div>
+          <h3>Usable at 2AM after failure</h3>
+          <p>Designed for stress situations. Clear, terse, no assumptions about current state.</p>
+        </div>
+      </div>
+
+      <div class="genesys-timeline">
+        <div class="genesys-title">FULL REBUILD · EST. 3.5 HRS</div>
+        <div class="genesys-steps">
+          <div class="gs-step">
+            <div class="gs-time">~30 min</div>
+            <div class="gs-bar"><div class="gs-fill" style="width:14%"></div></div>
+            <div class="gs-label">Network + VMs/LXCs</div>
+          </div>
+          <div class="gs-step">
+            <div class="gs-time">~20 min</div>
+            <div class="gs-bar"><div class="gs-fill" style="width:10%"></div></div>
+            <div class="gs-label">Base OS + SSH</div>
+          </div>
+          <div class="gs-step">
+            <div class="gs-time">~15 min</div>
+            <div class="gs-bar"><div class="gs-fill" style="width:7%"></div></div>
+            <div class="gs-label">AdGuard + Tailscale</div>
+          </div>
+          <div class="gs-step">
+            <div class="gs-time">~30 min</div>
+            <div class="gs-bar"><div class="gs-fill" style="width:14%"></div></div>
+            <div class="gs-label">K3s + ArgoCD</div>
+          </div>
+          <div class="gs-step">
+            <div class="gs-time">~45 min</div>
+            <div class="gs-bar"><div class="gs-fill c-orange-fill" style="width:21%"></div></div>
+            <div class="gs-label">All App Services</div>
+          </div>
+          <div class="gs-step">
+            <div class="gs-time">~30 min</div>
+            <div class="gs-bar"><div class="gs-fill" style="width:14%"></div></div>
+            <div class="gs-label">Monitoring Stacks</div>
+          </div>
+          <div class="gs-step">
+            <div class="gs-time">~15 min</div>
+            <div class="gs-bar"><div class="gs-fill c-green-fill" style="width:7%"></div></div>
+            <div class="gs-label">Validation</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 
 <footer>AMΔDEUS HOMELAB · 192.168.100.0/24 · MARCH 2026</footer>
 
