@@ -1493,6 +1493,7 @@
         <div>&nbsp;</div>
         <div class="term-prompt">root@amadeus:~# <span class="term-cursor"></span></div>
       </div>
+      <div class="term-hint-bar" id="term-hint-bar">CLICK TO TYPE · TAB AUTOCOMPLETE · ↑↓ HISTORY</div>
     </div>
 
     <div class="conclusion-grid" id="conclusion-grid">
@@ -1939,84 +1940,436 @@
 })();
 
 /* ══════════════════════════════════════════════════════════
-   TERMINAL TYPEWRITER — SYSTEM SECTION
+   TERMINAL — TYPEWRITER + INTERACTIVE INPUT
 ══════════════════════════════════════════════════════════ */
 (function() {
   const termBody = document.getElementById('terminal-body');
-  const lines = [
-    { type: 'cmd', text: 'root@amadeus:~# kubectl get nodes' },
-    { type: 'out', text: 'NAME    STATUS   ROLES           AGE   VERSION' },
-    { type: 'out', text: 'kubes   Ready    control-plane   46d   v1.34.3+k3s1' },
-    { type: 'blank', text: '' },
-    { type: 'cmd', text: 'root@amadeus:~# kubectl get pods -A | grep -v Completed' },
-    { type: 'out', text: '28 pods Running across all namespaces' },
-    { type: 'blank', text: '' },
-    { type: 'cmd', text: 'root@amadeus:~# uptime' },
-    { type: 'out', text: '17:20:15 up 34 days,  load average: 0.45, 0.38, 0.41' },
-    { type: 'blank', text: '' },
-    { type: 'prompt', text: 'root@amadeus:~# ' },
+  const hintBar  = document.getElementById('term-hint-bar');
+  if (!termBody) return;
+
+  let inputBuf = '';
+  let histList  = [];
+  let histIdx   = -1;
+  let inputSpan = null;
+  let inputActive = false;
+
+  /* ── Command database ── */
+  const DB = {
+    'kubectl get nodes': [
+      'NAME    STATUS   ROLES           AGE   VERSION',
+      'kubes   Ready    control-plane   47d   v1.34.3+k3s1',
+    ],
+    'kubectl get pods -a': PODS_ALL,
+    'kubectl get pods -A': PODS_ALL,
+    'kubectl get pods --all-namespaces': PODS_ALL,
+    'kubectl get pods -n prod': [
+      'NAME             READY   STATUS    RESTARTS',
+      'miniflux-7d9f4   1/1     Running   0',
+      'miniflux-db-0    1/1     Running   0',
+    ],
+    'kubectl get pods -n tools': [
+      'NAME              READY   STATUS    RESTARTS',
+      'searxng-6bc8f     1/1     Running   0',
+      'homepage-5af2c    1/1     Running   0',
+    ],
+    'kubectl get pods -n monitoring': [
+      'NAME                                    READY   STATUS    RESTARTS',
+      'alertmanager-kube-prom-alertmanager-0   2/2     Running   0',
+      'kube-prom-grafana-7d8b9f               3/3     Running   0',
+      'prometheus-kube-prom-prometheus-0       2/2     Running   0',
+      'promtail-x9f2k                          1/1     Running   0',
+    ],
+    'kubectl get pods -n argocd': [
+      'NAME                                         READY   STATUS    RESTARTS',
+      'argocd-application-controller-0              1/1     Running   2',
+      'argocd-applicationset-controller-6b7d4       1/1     Running   0',
+      'argocd-dex-server-5c9f2                      1/1     Running   0',
+      'argocd-notifications-controller-7a8b3        1/1     Running   0',
+      'argocd-redis-4d6e1                           1/1     Running   0',
+      'argocd-repo-server-8f2c7                     1/1     Running   1',
+      'argocd-server-3b9d5                          1/1     Running   0',
+    ],
+    'kubectl get namespaces': NS_LIST,
+    'kubectl get ns':         NS_LIST,
+    'kubectl get svc -a':     SVC_LIST,
+    'kubectl get svc -A':     SVC_LIST,
+    'kubectl get svc --all-namespaces': SVC_LIST,
+    'kubectl get ingress -a': ING_LIST,
+    'kubectl get ingress -A': ING_LIST,
+    'kubectl get ingress --all-namespaces': ING_LIST,
+    'kubectl get certificate -a': CERT_LIST,
+    'kubectl get certificate -A': CERT_LIST,
+    'kubectl get certificate --all-namespaces': CERT_LIST,
+    'kubectl get pvc -a': PVC_LIST,
+    'kubectl get pvc -A': PVC_LIST,
+    'kubectl get pvc --all-namespaces': PVC_LIST,
+    'kubectl top nodes': [
+      'NAME    CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%',
+      'kubes   387m         9%     3921Mi          63%',
+    ],
+    'helm list -a': HELM_LIST,
+    'helm list -A': HELM_LIST,
+    'helm list':    HELM_LIST,
+    'uptime': ['19:42:15 up 47 days,  2 users,  load average: 0.42, 0.38, 0.40'],
+    'kubectl version': [
+      'Client Version: v1.34.3+k3s1',
+      'Server Version: v1.34.3+k3s1',
+    ],
+    'kubectl cluster-info': [
+      'Kubernetes control plane is running at https://127.0.0.1:6443',
+      'CoreDNS is running at https://127.0.0.1:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy',
+    ],
+    'help': HELP_LIST,
+  };
+
+  const PODS_ALL = [
+    'NAMESPACE      NAME                                        READY   STATUS    RESTARTS',
+    'argocd         argocd-application-controller-0             1/1     Running   2',
+    'argocd         argocd-applicationset-controller-6b7d4      1/1     Running   0',
+    'argocd         argocd-dex-server-5c9f2                     1/1     Running   0',
+    'argocd         argocd-notifications-controller-7a8b3       1/1     Running   0',
+    'argocd         argocd-redis-4d6e1                          1/1     Running   0',
+    'argocd         argocd-repo-server-8f2c7                    1/1     Running   1',
+    'argocd         argocd-server-3b9d5                         1/1     Running   0',
+    'cert-manager   cert-manager-5d9c8                          1/1     Running   0',
+    'cert-manager   cert-manager-cainjector-7f4b2               1/1     Running   0',
+    'cert-manager   cert-manager-webhook-6a3d1                  1/1     Running   0',
+    'dev            nginx-webapp-4c7f9                          1/1     Running   0',
+    'kube-system    coredns-6b8d4                               1/1     Running   2',
+    'kube-system    kube-state-metrics-5f2c1                    1/1     Running   0',
+    'kube-system    node-exporter-9d3b7                         1/1     Running   0',
+    'media          calibre-web-2a8f5                           1/1     Running   0',
+    'monitoring     alertmanager-kube-prom-alertmanager-0        2/2     Running   0',
+    'monitoring     kube-prom-grafana-7d8b9                     3/3     Running   0',
+    'monitoring     prometheus-kube-prom-prometheus-0            2/2     Running   0',
+    'monitoring     promtail-x9f2k                              1/1     Running   0',
+    'prod           miniflux-7d9f4                              1/1     Running   0',
+    'prod           miniflux-db-0                               1/1     Running   0',
+    'tools          homepage-5af2c                              1/1     Running   0',
+    'tools          searxng-6bc8f                               1/1     Running   0',
   ];
 
-  let started = false;
+  const NS_LIST = [
+    'NAME              STATUS   AGE',
+    'argocd            Active   47d',
+    'cert-manager      Active   45d',
+    'default           Active   47d',
+    'dev               Active   47d',
+    'kube-system       Active   47d',
+    'media             Active   38d',
+    'monitoring        Active   44d',
+    'prod              Active   43d',
+    'staging           Active   47d',
+    'tools             Active   43d',
+  ];
 
-  function buildTerminal() {
-    if (started) return;
-    started = true;
-    termBody.innerHTML = '';
-    let lineIdx = 0;
+  const SVC_LIST = [
+    'NAMESPACE    NAME                TYPE        PORT(S)',
+    'argocd       argocd-server       NodePort    80:30880/TCP,443:30443/TCP',
+    'media        calibre-web         NodePort    8083:30920/TCP',
+    'monitoring   kube-prom-grafana   NodePort    80:30300/TCP',
+    'monitoring   prometheus-kube     NodePort    9090:30091/TCP',
+    'prod         miniflux            NodePort    80:30900/TCP',
+    'tools        homepage            ClusterIP   80/TCP',
+    'tools        searxng             NodePort    80:30910/TCP',
+  ];
 
-    const cursor = document.createElement('span');
-    cursor.className = 'term-cursor';
+  const ING_LIST = [
+    'NAMESPACE    NAME                  HOSTS                      PORTS',
+    'argocd       argocd-ingress        argocd.local               80,443',
+    'media        calibre-web-ingress   calibre.amadeus.local      80,443',
+    'monitoring   grafana-ingress       grafana.k8s.local          80,443',
+    'monitoring   prometheus-ingress    prometheus.k8s.local       80,443',
+    'prod         miniflux-ingress      miniflux.prod.local        80,443',
+    'tools        homepage-ingress      homepage.amadeus.local     80,443',
+    'tools        searxng-ingress       searxng.tools.local        80,443',
+  ];
 
-    function addLine(line, cb) {
-      const span = document.createElement('div');
-      if (line.type === 'blank') {
-        span.innerHTML = '&nbsp;';
-        termBody.appendChild(span);
-        setTimeout(cb, 80);
-        return;
-      }
-      if (line.type === 'out') {
-        span.className = 'term-output';
-        span.textContent = line.text;
-        termBody.appendChild(span);
-        setTimeout(cb, 60);
-        return;
-      }
-      // cmd or prompt — type char by char
-      span.className = line.type === 'prompt' ? 'term-prompt' : 'term-cmd';
-      termBody.appendChild(span);
-      termBody.appendChild(cursor);
-      let i = 0;
-      function typeNext() {
-        if (i < line.text.length) {
-          span.textContent += line.text[i++];
-          setTimeout(typeNext, 35 + Math.random() * 25);
-        } else {
-          if (line.type === 'prompt') return; // leave cursor blinking
-          termBody.removeChild(cursor);
-          span.appendChild(document.createElement('br'));
-          setTimeout(cb, 150);
-        }
-      }
-      typeNext();
-    }
+  const CERT_LIST = [
+    'NAMESPACE    NAME             READY   SECRET           AGE',
+    'argocd       argocd-tls       True    argocd-tls       44d',
+    'media        calibre-tls      True    calibre-tls      38d',
+    'monitoring   grafana-tls      True    grafana-tls      44d',
+    'monitoring   prometheus-tls   True    prometheus-tls   44d',
+    'prod         miniflux-tls     True    miniflux-tls     43d',
+    'tools        homepage-tls     True    homepage-tls     38d',
+    'tools        searxng-tls      True    searxng-tls      43d',
+  ];
 
-    function nextLine() {
-      if (lineIdx >= lines.length) return;
-      addLine(lines[lineIdx++], nextLine);
-    }
+  const PVC_LIST = [
+    'NAMESPACE   NAME                 STATUS   CAPACITY   ACCESS MODES',
+    'media       calibre-books-pvc    Bound    15Gi       RWO',
+    'media       calibre-config-pvc   Bound    1Gi        RWO',
+    'prod        miniflux-db-pvc      Bound    5Gi        RWO',
+  ];
 
-    nextLine();
+  const HELM_LIST = [
+    'NAME        NAMESPACE    REVISION   STATUS     CHART',
+    'kube-prom   monitoring   1          deployed   kube-prometheus-stack-67.4.0',
+  ];
+
+  const HELP_LIST = [
+    'Available commands:',
+    '  kubectl get nodes | pods [-A|-n <ns>] | namespaces | svc | ingress',
+    '  kubectl get certificate [-A] | pvc [-A]',
+    '  kubectl top nodes | kubectl version | kubectl cluster-info',
+    '  helm list [-A]',
+    '  uptime | clear | help',
+    '',
+    'Keyboard: ↑↓ history · Tab autocomplete',
+  ];
+
+  /* Fix forward references */
+  DB['kubectl get pods -a'] = PODS_ALL;
+  DB['kubectl get pods -A'] = PODS_ALL;
+  DB['kubectl get pods --all-namespaces'] = PODS_ALL;
+  DB['kubectl get namespaces'] = NS_LIST;
+  DB['kubectl get ns'] = NS_LIST;
+  DB['kubectl get svc -a'] = SVC_LIST;
+  DB['kubectl get svc -A'] = SVC_LIST;
+  DB['kubectl get svc --all-namespaces'] = SVC_LIST;
+  DB['kubectl get ingress -a'] = ING_LIST;
+  DB['kubectl get ingress -A'] = ING_LIST;
+  DB['kubectl get ingress --all-namespaces'] = ING_LIST;
+  DB['kubectl get certificate -a'] = CERT_LIST;
+  DB['kubectl get certificate -A'] = CERT_LIST;
+  DB['kubectl get certificate --all-namespaces'] = CERT_LIST;
+  DB['kubectl get pvc -a'] = PVC_LIST;
+  DB['kubectl get pvc -A'] = PVC_LIST;
+  DB['kubectl get pvc --all-namespaces'] = PVC_LIST;
+  DB['helm list -a'] = HELM_LIST;
+  DB['helm list -A'] = HELM_LIST;
+  DB['helm list'] = HELM_LIST;
+  DB['help'] = HELP_LIST;
+
+  /* Tab completion prefixes */
+  const COMPLETIONS = [
+    'kubectl get nodes', 'kubectl get pods -A', 'kubectl get pods -n ',
+    'kubectl get namespaces', 'kubectl get ns', 'kubectl get svc -A',
+    'kubectl get ingress -A', 'kubectl get certificate -A', 'kubectl get pvc -A',
+    'kubectl top nodes', 'kubectl version', 'kubectl cluster-info',
+    'helm list -A', 'uptime', 'clear', 'help',
+  ];
+
+  /* ── DOM helpers ── */
+  function appendLine(text, cls) {
+    const d = document.createElement('div');
+    d.className = cls || 'term-output';
+    d.textContent = text || ' ';
+    termBody.appendChild(d);
+    termBody.scrollTop = termBody.scrollHeight;
   }
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) buildTerminal();
+  function appendBlank() { appendLine('', 'term-output'); }
+
+  /* ── Input line ── */
+  function buildInputLine() {
+    const wrap = document.createElement('div');
+    wrap.className = 'term-input-line';
+    wrap.id = 'term-active-line';
+
+    const prompt = document.createElement('span');
+    prompt.className = 'term-prompt';
+    prompt.textContent = 'root@amadeus:~# ';
+
+    inputSpan = document.createElement('span');
+    inputSpan.className = 'term-input-buf';
+
+    const cur = document.createElement('span');
+    cur.className = 'term-cursor';
+
+    wrap.appendChild(prompt);
+    wrap.appendChild(inputSpan);
+    wrap.appendChild(cur);
+    termBody.appendChild(wrap);
+    termBody.scrollTop = termBody.scrollHeight;
+  }
+
+  function removeInputLine() {
+    const el = document.getElementById('term-active-line');
+    if (el) el.remove();
+  }
+
+  function renderInput() {
+    if (inputSpan) inputSpan.textContent = inputBuf;
+  }
+
+  /* ── Run command ── */
+  function execCmd(raw) {
+    const cmd = raw.trim();
+    removeInputLine();
+
+    // Echo command
+    appendLine('root@amadeus:~# ' + cmd, 'term-cmd');
+
+    if (cmd === '') { buildInputLine(); return; }
+
+    if (cmd === 'clear') {
+      termBody.innerHTML = '';
+      buildInputLine();
+      return;
+    }
+
+    // Add to history
+    if (cmd && (histList.length === 0 || histList[0] !== cmd)) {
+      histList.unshift(cmd);
+      if (histList.length > 30) histList.pop();
+    }
+    histIdx = -1;
+
+    const out = DB[cmd];
+    if (out) {
+      out.forEach(line => appendLine(line));
+    } else {
+      appendLine('-bash: ' + cmd.split(' ')[0] + ': command not found', 'term-error');
+    }
+
+    appendBlank();
+    buildInputLine();
+  }
+
+  /* ── Keyboard handler ── */
+  function onKey(e) {
+    if (!inputActive) return;
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const cmd = inputBuf;
+      inputBuf = '';
+      execCmd(cmd);
+
+    } else if (e.key === 'Backspace') {
+      e.preventDefault();
+      inputBuf = inputBuf.slice(0, -1);
+      renderInput();
+
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (histIdx < histList.length - 1) histIdx++;
+      inputBuf = histList[histIdx] || '';
+      renderInput();
+
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (histIdx > 0) { histIdx--; inputBuf = histList[histIdx] || ''; }
+      else { histIdx = -1; inputBuf = ''; }
+      renderInput();
+
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      const matches = COMPLETIONS.filter(c => c.startsWith(inputBuf));
+      if (matches.length === 1) {
+        inputBuf = matches[0];
+        renderInput();
+      } else if (matches.length > 1) {
+        removeInputLine();
+        appendLine('root@amadeus:~# ' + inputBuf, 'term-cmd');
+        appendLine(matches.join('   '));
+        buildInputLine();
+      }
+
+    } else if (e.key === 'l' && e.ctrlKey) {
+      e.preventDefault();
+      termBody.innerHTML = '';
+      buildInputLine();
+
+    } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+      inputBuf += e.key;
+      renderInput();
+    }
+  }
+
+  /* ── Activate terminal ── */
+  function activate() {
+    if (inputActive) return;
+    inputActive = true;
+    if (hintBar) { hintBar.style.opacity = '0.3'; hintBar.textContent = 'TYPING MODE ACTIVE · ESC TO EXIT · CTRL+L CLEAR'; }
+    document.addEventListener('keydown', onKey);
+  }
+
+  function deactivate() {
+    inputActive = false;
+    if (hintBar) { hintBar.style.opacity = '1'; hintBar.textContent = 'CLICK TO TYPE · TAB AUTOCOMPLETE · ↑↓ HISTORY'; }
+    document.removeEventListener('keydown', onKey);
+  }
+
+  /* ── ESC to deactivate ── */
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && inputActive) deactivate();
+  });
+
+  /* ── Click on terminal card to activate ── */
+  const card = termBody.closest('.terminal-card');
+  if (card) {
+    card.addEventListener('click', (e) => {
+      e.stopPropagation();
+      activate();
     });
+  }
+
+  /* ── Typewriter intro → then activate ── */
+  const intro = [
+    { type: 'cmd', text: 'root@amadeus:~# kubectl get nodes' },
+    { type: 'out', text: 'NAME    STATUS   ROLES           AGE   VERSION' },
+    { type: 'out', text: 'kubes   Ready    control-plane   47d   v1.34.3+k3s1' },
+    { type: 'blank' },
+    { type: 'cmd', text: 'root@amadeus:~# kubectl get pods -A | grep Running' },
+    { type: 'out', text: '24 pods Running across 9 namespaces' },
+    { type: 'blank' },
+    { type: 'cmd', text: 'root@amadeus:~# uptime' },
+    { type: 'out', text: '19:42:15 up 47 days,  load average: 0.42, 0.38, 0.40' },
+    { type: 'blank' },
+  ];
+
+  let built = false;
+
+  function runIntro() {
+    if (built) return;
+    built = true;
+    termBody.innerHTML = '';
+    let idx = 0;
+
+    function next() {
+      if (idx >= intro.length) { buildInputLine(); return; }
+      const line = intro[idx++];
+      const d = document.createElement('div');
+      if (line.type === 'blank') {
+        d.innerHTML = '&nbsp;';
+        termBody.appendChild(d);
+        setTimeout(next, 80);
+      } else if (line.type === 'out') {
+        d.className = 'term-output';
+        d.textContent = line.text;
+        termBody.appendChild(d);
+        termBody.scrollTop = termBody.scrollHeight;
+        setTimeout(next, 55);
+      } else {
+        d.className = 'term-cmd';
+        termBody.appendChild(d);
+        let i = 0;
+        const cur = document.createElement('span');
+        cur.className = 'term-cursor';
+        termBody.appendChild(cur);
+        function typeChar() {
+          if (i < line.text.length) {
+            d.textContent += line.text[i++];
+            setTimeout(typeChar, 30 + Math.random() * 20);
+          } else {
+            cur.remove();
+            setTimeout(next, 140);
+          }
+        }
+        typeChar();
+      }
+    }
+    next();
+  }
+
+  const obs = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) runIntro();
   }, { threshold: 0.3 });
 
-  if (termBody) observer.observe(termBody);
+  obs.observe(termBody);
 })();
 
 /* ══════════════════════════════════════════════════════════
@@ -2185,6 +2538,90 @@
 
   fetchAdGuard();
 })();
+
+/* ══════════════════════════════════════════════════════════
+   KEYBOARD NAVIGATION
+══════════════════════════════════════════════════════════ */
+(function() {
+  const sections = ['hero','architecture','network','infrastructure','services','security','system','genesys'];
+  let currentIdx = 0;
+  let toastTimer = null;
+
+  /* Create toast */
+  const toast = document.createElement('div');
+  toast.className = 'kb-toast';
+  document.body.appendChild(toast);
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1400);
+  }
+
+  function goTo(idx) {
+    if (idx < 0 || idx >= sections.length) return;
+    currentIdx = idx;
+    const el = document.getElementById(sections[idx]);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    showToast((idx + 1) + ' · ' + sections[idx].toUpperCase());
+  }
+
+  /* Update currentIdx on scroll */
+  const secEls = sections.map(id => document.getElementById(id)).filter(Boolean);
+  const scrollObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const i = sections.indexOf(e.target.id);
+        if (i !== -1) currentIdx = i;
+      }
+    });
+  }, { threshold: 0.5 });
+  secEls.forEach(el => scrollObs.observe(el));
+
+  /* Key handler */
+  document.addEventListener('keydown', (e) => {
+    /* Skip when terminal is typing */
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (document.querySelector('#term-active-line') && e.key !== 'Escape' &&
+        e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' &&
+        !/^[1-8]$/.test(e.key) && e.key !== 'j' && e.key !== 'k') return;
+
+    /* Number keys 1-8 */
+    if (/^[1-8]$/.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      const termActive = document.querySelector('.terminal-body')
+        && document.getElementById('term-active-line');
+      /* Only navigate if terminal is not the active typer */
+      if (!termActive || e.key !== undefined) {
+        e.preventDefault();
+        goTo(parseInt(e.key) - 1);
+        return;
+      }
+    }
+
+    /* j / ArrowDown → next */
+    if ((e.key === 'j' || e.key === 'ArrowDown') && !e.ctrlKey) {
+      const inTerm = !!document.querySelector('#term-active-line');
+      if (inTerm) return;
+      e.preventDefault();
+      goTo(currentIdx + 1);
+    }
+
+    /* k / ArrowUp → prev */
+    if ((e.key === 'k' || e.key === 'ArrowUp') && !e.ctrlKey) {
+      const inTerm = !!document.querySelector('#term-active-line');
+      if (inTerm) return;
+      e.preventDefault();
+      goTo(currentIdx - 1);
+    }
+
+    /* ? → show shortcuts */
+    if (e.key === '?') {
+      showToast('1-8 SECTIONS · J/K NAVIGATE · CLICK TERMINAL TO TYPE');
+    }
+  });
+})();
+
 </script>
 </body>
 </html>
