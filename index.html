@@ -2274,6 +2274,7 @@
       buildInputLine();
 
     } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
       inputBuf += e.key;
       renderInput();
     }
