@@ -1528,7 +1528,7 @@
 
     <div class="genesys-layout">
 
-      <div class="genesys-philosophy">
+      <div class="genesys-philosophy" id="genesys-philosophy">
         <div class="arch-card c-cyan">
           <div class="arch-num">01 · REPRODUCIBLE</div>
           <div class="arch-icon">🔁</div>
@@ -1876,6 +1876,7 @@
     { id: 'pod-grid', selector: '.pod', stagger: 60 },
     { id: 'svc-grid', selector: '.svc-card', stagger: 70 },
     { id: 'conclusion-grid', selector: '.concl-card', stagger: 90 },
+    { id: 'genesys-philosophy', selector: '.arch-card', stagger: 80 },
   ];
 
   const triggered = new Set();
@@ -2074,6 +2075,115 @@
     const t = e.touches[0];
     spawnStreams(t.clientX, t.clientY);
   }, { passive: true });
+})();
+
+/* ══════════════════════════════════════════════════════════
+   GENESYS BARS ANIMATION
+══════════════════════════════════════════════════════════ */
+(function() {
+  const steps = document.querySelector('.genesys-steps');
+  if (!steps) return;
+
+  // Store target widths then reset to 0
+  document.querySelectorAll('.gs-fill').forEach(bar => {
+    bar._target = bar.style.width;
+    bar.style.width = '0%';
+    bar.style.transition = 'none';
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('.gs-fill').forEach((bar, i) => {
+          setTimeout(() => {
+            bar.style.transition = 'width 0.9s cubic-bezier(0.4,0,0.2,1)';
+            bar.style.width = bar._target;
+          }, i * 140);
+        });
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  observer.observe(steps);
+})();
+
+/* ══════════════════════════════════════════════════════════
+   COUNT-UP ANIMATION — HERO STATS
+══════════════════════════════════════════════════════════ */
+(function() {
+  const statEls = document.querySelectorAll('.stat-num');
+  const targets = [
+    { value: 6,   suffix: '',  duration: 900  },
+    { value: 329, suffix: 'K', duration: 1600 },
+    { value: 24,  suffix: '',  duration: 1000 },
+    { value: 100, suffix: '%', duration: 1200 },
+  ];
+
+  function countUp(el, value, suffix, duration) {
+    const start = performance.now();
+    const total = suffix === 'K' ? value * 1000 : value;
+
+    function frame(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      const cur = Math.floor(eased * total);
+
+      if (suffix === 'K') {
+        el.textContent = cur >= 1000 ? Math.floor(cur / 1000) + 'K' : cur;
+      } else {
+        el.textContent = cur + suffix;
+      }
+
+      if (p < 1) requestAnimationFrame(frame);
+      else el.textContent = value + suffix;
+    }
+    requestAnimationFrame(frame);
+  }
+
+  let fired = false;
+  const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && !fired) {
+      fired = true;
+      statEls.forEach((el, i) => {
+        const t = targets[i];
+        if (!t) return;
+        el.textContent = '0';
+        setTimeout(() => countUp(el, t.value, t.suffix, t.duration), i * 180);
+      });
+    }
+  }, { threshold: 0.4 });
+
+  const hero = document.getElementById('hero');
+  if (hero) observer.observe(hero);
+})();
+
+/* ══════════════════════════════════════════════════════════
+   ADGUARD LIVE STATS
+══════════════════════════════════════════════════════════ */
+(function() {
+  const statEl = document.querySelector('.stat-num:nth-child(1)');
+  const dnsBig = document.querySelector('.dns-big');
+
+  async function fetchAdGuard() {
+    try {
+      const res = await fetch('http://192.168.100.135:3001/control/stats', {
+        headers: { 'Authorization': 'Basic ' + btoa('admin:') },
+        signal: AbortSignal.timeout(2000)
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const blocked = data.num_blocked_filtering;
+      if (blocked && dnsBig) {
+        const k = Math.round(blocked / 1000);
+        dnsBig.textContent = k + 'K';
+      }
+    } catch (_) {
+      // unreachable from public network — static value stays
+    }
+  }
+
+  fetchAdGuard();
 })();
 </script>
 </body>
