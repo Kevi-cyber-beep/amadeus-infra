@@ -842,6 +842,41 @@
     .concl-card h3 { font-size: 1.05rem; margin-bottom: 10px; }
     .hero-sub { font-size: 14px; letter-spacing: 3px; }
     section h2 { line-height: 1.15; margin-bottom: 48px; }
+
+    /* ── Genesys Section ── */
+    .genesys-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 40px; }
+    .genesys-philosophy { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .genesys-timeline { display: flex; flex-direction: column; justify-content: center; }
+    .genesys-title { font-family: var(--mono); font-size: 0.85rem; color: var(--cyan); letter-spacing: 2px; margin-bottom: 24px; text-align: center; }
+    .genesys-steps { display: flex; flex-direction: column; gap: 12px; }
+    .gs-step { display: grid; grid-template-columns: 70px 1fr 160px; align-items: center; gap: 12px; }
+    .gs-time { font-family: var(--mono); font-size: 0.8rem; color: var(--green); text-align: right; }
+    .gs-bar { height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+    .gs-fill { height: 100%; background: var(--cyan); border-radius: 4px; transition: width 1.2s ease; }
+    .gs-label { font-family: var(--mono); font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+    .c-cyan .arch-num { color: var(--cyan); }
+    .c-green .arch-num { color: var(--green); }
+    .c-purple .arch-num { color: #a78bfa; }
+    .c-orange .arch-num { color: #fb923c; }
+    .c-orange-fill { background: #fb923c; }
+    .c-green-fill { background: var(--green); }
+    .arch-num { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 2px; margin-bottom: 8px; opacity: 0.7; }
+    .arch-icon { font-size: 1.8rem; margin-bottom: 8px; }
+
+    /* ── Terminal Interactive ── */
+    .term-hint-bar { font-family: var(--mono); font-size: 0.7rem; color: rgba(0,255,157,0.3); text-align: center; padding: 8px; letter-spacing: 2px; border-top: 1px solid rgba(0,255,157,0.08); }
+    .term-input-line { display: flex; align-items: center; }
+    .term-input-buf { color: var(--green); outline: none; caret-color: var(--cyan); font-family: var(--mono); font-size: inherit; }
+    .term-error { color: #ff5f57; }
+    .kb-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(0,212,255,0.15); border: 1px solid var(--cyan); color: var(--cyan); font-family: var(--mono); font-size: 0.8rem; padding: 8px 20px; border-radius: 6px; z-index: 9999; pointer-events: none; animation: fadeout 2s forwards; }
+    @keyframes fadeout { 0%,70% { opacity: 1; } 100% { opacity: 0; } }
+
+    /* ── Genesys Responsive ── */
+    @media (max-width: 900px) {
+      .genesys-layout { grid-template-columns: 1fr; }
+      .genesys-philosophy { grid-template-columns: 1fr; }
+      .gs-step { grid-template-columns: 60px 1fr 120px; }
+    }
   </style>
 </head>
 <body>
@@ -903,7 +938,7 @@
     <div class="orbit-ring"></div>
     <div class="orbit-ring"></div>
   </div>
-  <div class="hero-badge">KEVIANO GJONAJ · MARCH 2026</div>
+  <div class="hero-badge">KEVIANO GJONAJ · APRIL 2026</div>
   <h1>Homelab<br><span style="color:var(--cyan)">AMΔDEUS</span></h1>
   <p class="hero-sub">Private Infrastructure · Self-Hosted · Zero Cloud Dependency</p>
   <div class="hero-stats">
@@ -939,7 +974,7 @@
         <p>Tailscale subnet router provides end-to-end encrypted remote access to the entire 192.168.100.0/24 network.</p>
         <div class="card-tags">
           <span class="tag">TAILSCALE</span>
-          <span class="tag">TAILSCALE</span>
+          <span class="tag">WIREGUARD</span>
           <span class="tag">UFW</span>
         </div>
       </div>
@@ -1489,7 +1524,7 @@
         <div class="term-output">kubes   Ready    control-plane   46d   v1.34.3+k3s1</div>
         <div>&nbsp;</div>
         <div class="term-cmd">root@amadeus:~# kubectl get pods -A | grep -v Completed</div>
-        <div class="term-output">28 pods Running across all namespaces</div>
+        <div class="term-output">24 pods Running across all namespaces</div>
         <div>&nbsp;</div>
         <div class="term-prompt">root@amadeus:~# <span class="term-cursor"></span></div>
       </div>
@@ -1602,7 +1637,7 @@
 </section>
 
 
-<footer>AMΔDEUS HOMELAB · 192.168.100.0/24 · MARCH 2026</footer>
+<footer>AMΔDEUS HOMELAB · 192.168.100.0/24 · APRIL 2026</footer>
 
 <script>
 /* ══════════════════════════════════════════════════════════
@@ -2515,30 +2550,9 @@
 /* ══════════════════════════════════════════════════════════
    ADGUARD LIVE STATS
 ══════════════════════════════════════════════════════════ */
-(function() {
-  const statEl = document.querySelector('.stat-num:nth-child(1)');
-  const dnsBig = document.querySelector('.dns-big');
-
-  async function fetchAdGuard() {
-    try {
-      const res = await fetch('http://192.168.100.135:3001/control/stats', {
-        headers: { 'Authorization': 'Basic ' + btoa('admin:') },
-        signal: AbortSignal.timeout(2000)
-      });
-      if (!res.ok) return;
-      const data = await res.json();
-      const blocked = data.num_blocked_filtering;
-      if (blocked && dnsBig) {
-        const k = Math.round(blocked / 1000);
-        dnsBig.textContent = k + 'K';
-      }
-    } catch (_) {
-      // unreachable from public network — static value stays
-    }
-  }
-
-  fetchAdGuard();
-})();
+// AdGuard stats — static display only (no API credentials in client-side code)
+// Live value: 329,392 blocked domains (updated manually)
+// To update: check AdGuard dashboard at http://192.168.100.135:3001
 
 /* ══════════════════════════════════════════════════════════
    KEYBOARD NAVIGATION
