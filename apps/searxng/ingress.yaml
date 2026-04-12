@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: searxng-ingress
+  namespace: tools
+  annotations:
+    cert-manager.io/cluster-issuer: amadeus-ca-issuer
+spec:
+  rules:
+    - host: searxng.tools.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: searxng
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - searxng.tools.local
+      secretName: searxng-tls

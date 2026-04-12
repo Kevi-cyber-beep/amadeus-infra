@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: searxng-config
+  namespace: tools
+data:
+  settings.yml: |
+    use_default_settings: true
+
+    general:
+      debug: false
+      instance_name: "Amadeus Search"
+      privacypolicy_url: false
+      donation_url: false
+      contact_url: false
+      enable_metrics: false
+
+    ui:
+      static_use_hash: true
+      default_theme: simple
+      theme_args:
+        simple_style: dark
+
+    search:
+      safe_search: 0
+      autocomplete: ""
+      default_lang: "en"
+      ban_time_on_fail: 5
+      max_ban_time_on_fail: 120
+
+    server:
+      port: 8080
+      bind_address: "0.0.0.0"
+      secret_key: "cc29a7f50612eb9d41d2697f85239bc71c0bd70fd72ed60196f110f4a485733d"
+      base_url: "http://searxng.tools.local"
+      image_proxy: true
+      http_protocol_version: "1.0"
+      method: "POST"
+
+    redis:
+      url: false
+
+    outgoing:
+      request_timeout: 3.0
+      max_request_timeout: 10.0
+      useragent_suffix: ""
+      pool_connections: 100
+      pool_maxsize: 20
