@@ -31,7 +31,7 @@ data:
     server:
       port: 8080
       bind_address: "0.0.0.0"
-      secret_key: "cc29a7f50612eb9d41d2697f85239bc71c0bd70fd72ed60196f110f4a485733d"
+      secret_key: "MANAGED_BY_K8S_SECRET"
       base_url: "http://searxng.tools.local"
       image_proxy: true
       http_protocol_version: "1.0"

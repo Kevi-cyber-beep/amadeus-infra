@@ -25,7 +25,10 @@ spec:
             - name: SEARXNG_SETTINGS_PATH
               value: /etc/searxng/settings.yml
             - name: SEARXNG_SECRET
-              value: cc29a7f50612eb9d41d2697f85239bc71c0bd70fd72ed60196f110f4a485733d
+              valueFrom:
+                secretKeyRef:
+                  name: searxng-secret
+                  key: secret-key
           resources:
             requests:
               cpu: 100m
